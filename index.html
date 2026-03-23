@@ -15,7 +15,7 @@
       color: #0f172a;
       padding: 24px;
     }
-    .wrap { max-width: 1080px; margin: 0 auto; }
+    .wrap { max-width: 1040px; margin: 0 auto; }
     .card {
       background: rgba(255,255,255,0.92);
       border: 1px solid rgba(148,163,184,0.2);
@@ -114,7 +114,6 @@
     button:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
     .primary { background: linear-gradient(135deg, #0f172a, #1e293b); color: white; }
     .secondary { background: linear-gradient(135deg, #e2e8f0, #f8fafc); color: #0f172a; }
-    .accent { background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #1e3a8a; }
 
     .status { margin-left: auto; color: #334155; font-weight: 800; min-height: 24px; }
 
@@ -122,9 +121,8 @@
       padding: 0 20px 28px;
       display: none;
     }
-    .race-stage.active {
-      display: block;
-    }
+    .race-stage.active { display: block; }
+
     .banner {
       margin-top: 18px;
       margin-bottom: 14px;
@@ -211,21 +209,31 @@
       box-shadow: 0 10px 22px rgba(15,23,42,0.18);
     }
 
-    .finish-label {
-      display: flex;
-      justify-content: flex-end;
-      font-size: 12px;
-      color: #64748b;
-      margin: 0 14px 10px 0;
-      font-weight: 900;
-      letter-spacing: 0.16em;
+    .track-grid {
+      display: grid;
+      gap: 14px;
     }
-
-    .mega-track-wrap {
-      position: relative;
-      border-radius: 28px;
+    .lane-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 96px;
+      gap: 14px;
+      align-items: center;
+    }
+    .lane-label {
+      font-weight: 900;
+      font-size: 18px;
+      text-align: right;
+      white-space: nowrap;
       overflow: hidden;
-      border: 1px solid rgba(148,163,184,0.24);
+      text-overflow: ellipsis;
+      color: #0f172a;
+    }
+    .single-track {
+      position: relative;
+      height: 68px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.28);
       background:
         radial-gradient(circle at 50% 0%, rgba(255,255,255,0.18), transparent 30%),
         linear-gradient(180deg, #0f172a 0%, #172554 36%, #1d4ed8 100%);
@@ -233,26 +241,22 @@
         inset 0 1px 0 rgba(255,255,255,0.16),
         inset 0 -1px 0 rgba(15,23,42,0.2),
         0 16px 34px rgba(30,64,175,0.14);
-      padding: 18px 18px 20px;
     }
-    .mega-track-wrap::before {
-      content: '';
+    .single-track-sheen {
       position: absolute;
-      inset: 16px 18px;
-      border-radius: 22px;
-      background:
-        repeating-linear-gradient(
-          90deg,
-          rgba(255,255,255,0.10) 0 18px,
-          rgba(255,255,255,0.02) 18px 36px
-        );
+      inset: 8px 14px;
+      border-radius: 999px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.10) 0 18px,
+        rgba(255,255,255,0.02) 18px 36px
+      );
       opacity: 0.5;
       pointer-events: none;
     }
-    .mega-track-wrap::after {
-      content: '';
+    .single-track-dash {
       position: absolute;
-      left: 24px;
+      left: 18px;
       right: 34px;
       top: 50%;
       height: 2px;
@@ -265,62 +269,27 @@
       opacity: 0.38;
       pointer-events: none;
     }
-    .finish-wall {
+    .single-track-finish {
       position: absolute;
       right: 18px;
-      top: 16px;
-      bottom: 16px;
-      width: 26px;
-      border-radius: 10px;
-      background:
-        conic-gradient(
-          from 45deg,
-          #0f172a 0 25%,
-          #f8fafc 0 50%,
-          #0f172a 0 75%,
-          #f8fafc 0 100%
-        );
+      top: 7px;
+      bottom: 7px;
+      width: 24px;
+      border-radius: 8px;
+      background: conic-gradient(
+        from 45deg,
+        #0f172a 0 25%,
+        #f8fafc 0 50%,
+        #0f172a 0 75%,
+        #f8fafc 0 100%
+      );
       background-size: 12px 12px;
-      box-shadow:
-        0 0 0 2px rgba(255,255,255,0.12),
-        inset 0 0 0 1px rgba(15,23,42,0.18);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.12), inset 0 0 0 1px rgba(15,23,42,0.18);
       z-index: 3;
-    }
-    .track-grid {
-      position: relative;
-      min-height: 320px;
-      z-index: 2;
-    }
-    .lane-row {
-      position: relative;
-      display: grid;
-      grid-template-columns: 140px 1fr 90px;
-      gap: 14px;
-      align-items: center;
-      min-height: 58px;
-    }
-    .lane-row + .lane-row {
-      border-top: 1px dashed rgba(255,255,255,0.18);
-    }
-    .lane-label {
-      font-weight: 900;
-      font-size: 18px;
-      text-align: right;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      color: white;
-      text-shadow: 0 2px 8px rgba(15,23,42,0.25);
-      padding-right: 4px;
-    }
-    .lane-line {
-      position: relative;
-      height: 100%;
-      min-height: 58px;
     }
     .runner {
       position: absolute;
-      left: 0;
+      left: 10px;
       top: 50%;
       transform: translate(0,-50%);
       font-size: 38px;
@@ -332,9 +301,8 @@
     .lane-progress {
       font-weight: 900;
       font-size: 15px;
-      color: white;
+      color: #334155;
       text-align: right;
-      text-shadow: 0 2px 8px rgba(15,23,42,0.2);
     }
 
     .result {
@@ -366,18 +334,8 @@
     }
     .ranking-place { font-size: 18px; font-weight: 900; color: #1d4ed8; }
     .ranking-name { font-size: 16px; font-weight: 900; color: #0f172a; }
-    .ranking-time {
-      font-size: 14px;
-      color: #0f172a;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-    .ranking-meta {
-      font-size: 13px;
-      color: #64748b;
-      font-weight: 800;
-      white-space: nowrap;
-    }
+    .ranking-time { font-size: 14px; color: #0f172a; font-weight: 900; white-space: nowrap; }
+    .ranking-meta { font-size: 13px; color: #64748b; font-weight: 800; white-space: nowrap; }
 
     @media (max-width: 900px) {
       .control-grid, .odds-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -399,7 +357,7 @@
       .mini-button-row button { flex: 1; }
       .status { margin-left: 0; }
       .banner-top { align-items: flex-start; }
-      .lane-row { grid-template-columns: 1fr; gap: 6px; min-height: 66px; }
+      .lane-row { grid-template-columns: 1fr; gap: 6px; }
       .lane-label { text-align: left; }
       .lane-progress { text-align: right; }
       .runner { font-size: 34px; }
@@ -431,7 +389,6 @@
         <div class="button-row">
           <button id="setupBtn" class="primary">설정완료</button>
           <button id="resetBtn" class="secondary">초기화</button>
-          <button id="randomBtn" class="accent">이름 랜덤 추천</button>
           <button id="rerollOddsBtn" class="secondary">승률 다시 뽑기</button>
           <div id="status" class="status">참가자 설정 중</div>
         </div>
@@ -443,7 +400,7 @@
             <div>
               <div class="banner-kicker">RACE EVENT</div>
               <div class="banner-title">이모지 스프린트 배틀</div>
-              <div class="banner-sub">설정이 끝났습니다. 아래 버튼을 눌러 30초 레이스를 시작하세요. 중간 이벤트로 흐름이 달라질 수 있습니다.</div>
+              <div class="banner-sub">설정이 끝났습니다. 아래 버튼을 눌러 레이스를 시작하세요. 중간 이벤트로 흐름이 달라질 수 있습니다.</div>
             </div>
           </div>
           <div class="banner-actions">
@@ -457,12 +414,7 @@
           <div id="timerBox" class="timer-box">30.00초</div>
         </div>
 
-        <div class="finish-label">FINISH</div>
-        <div class="mega-track-wrap">
-          <div class="finish-wall"></div>
-          <div id="trackGrid" class="track-grid"></div>
-        </div>
-
+        <div id="trackGrid" class="track-grid"></div>
         <div id="result" class="result"></div>
       </div>
     </div>
@@ -471,12 +423,6 @@
   <script>
     const emojiPool = ['🐰', '🐢', '🐶', '🐱', '🦊', '🐼', '🐯', '🐻', '🐨', '🐸', '🐵', '🦁'];
     const defaultNames = ['토끼', '거북이', '강아지', '고양이', '여우', '판다', '호랑이', '곰', '코알라', '개구리', '원숭이', '사자'];
-    const randomNameSets = [
-      ['치타', '판다', '햄스터', '여우', '백호', '까마귀'],
-      ['오리', '호랑이', '곰', '원숭이', '나무늘보', '독수리'],
-      ['사자', '펭귄', '코알라', '늑대', '수달', '표범'],
-      ['알파', '베타', '감마', '델타', '오메가', '제타']
-    ];
 
     const RACE_DURATION = 15;
     const TICK_MS = 100;
@@ -496,7 +442,6 @@
     const startRaceBtn = document.getElementById('startRaceBtn');
     const backToSetupBtn = document.getElementById('backToSetupBtn');
     const resetBtn = document.getElementById('resetBtn');
-    const randomBtn = document.getElementById('randomBtn');
     const rerollOddsBtn = document.getElementById('rerollOddsBtn');
     const addBtn = document.getElementById('addBtn');
     const removeBtn = document.getElementById('removeBtn');
@@ -580,7 +525,6 @@
 
       addBtn.disabled = raceRunning || participants.length >= maxParticipants;
       removeBtn.disabled = raceRunning || participants.length <= minParticipants;
-      randomBtn.disabled = raceRunning;
       rerollOddsBtn.disabled = raceRunning;
       setupBtn.disabled = raceRunning;
     }
@@ -614,7 +558,10 @@
       trackGridEl.innerHTML = racers.map((racer, index) => `
         <div class="lane-row">
           <div class="lane-label">${racer.emoji} ${racer.name}</div>
-          <div class="lane-line" id="lane-line-${index}">
+          <div class="single-track" id="lane-line-${index}">
+            <div class="single-track-sheen"></div>
+            <div class="single-track-dash"></div>
+            <div class="single-track-finish"></div>
             <div class="runner" id="runner-${index}">${racer.emoji}</div>
           </div>
           <div class="lane-progress" id="progress-${index}">${raceRunning ? '0%' : `${racer.odds}%`}</div>
@@ -639,15 +586,12 @@
     function getTravelLimit(index) {
       const laneLine = document.getElementById(`lane-line-${index}`);
       const runner = document.getElementById(`runner-${index}`);
-      const trackWrap = document.querySelector('.mega-track-wrap');
-      const finishWall = document.querySelector('.finish-wall');
-      if (!laneLine || !runner || !trackWrap || !finishWall) return 0;
+      const finish = laneLine ? laneLine.querySelector('.single-track-finish') : null;
+      if (!laneLine || !runner || !finish) return 0;
       const runnerWidth = runner.offsetWidth;
-      const laneRect = laneLine.getBoundingClientRect();
-      const trackRect = trackWrap.getBoundingClientRect();
-      const finishRect = finishWall.getBoundingClientRect();
-      const finishXInsideLane = finishRect.left - laneRect.left + finishRect.width - runnerWidth - 4;
-      return Math.max(0, Math.min(finishXInsideLane, laneRect.width - runnerWidth));
+      const finishLeft = finish.offsetLeft;
+      const finishWidth = finish.offsetWidth;
+      return Math.max(0, finishLeft + finishWidth - runnerWidth - 4);
     }
 
     function updatePositions() {
@@ -839,18 +783,6 @@
       }, TICK_MS);
     }
 
-    function randomizeNames() {
-      const picked = randomNameSets[Math.floor(Math.random() * randomNameSets.length)];
-      participants = participants.map((participant, index) => ({
-        ...participant,
-        name: picked[index] || participant.name
-      }));
-      renderParticipantInputs();
-      renderOddsBoard();
-      if (setupDone && !raceRunning) buildAndRenderIdleTrack();
-      statusEl.textContent = setupDone ? '설정 완료' : '참가자 설정 중';
-    }
-
     function rerollOdds() {
       if (raceRunning) return;
       assignOdds();
@@ -887,7 +819,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
     resetBtn.addEventListener('click', () => resetRace());
-    randomBtn.addEventListener('click', randomizeNames);
     rerollOddsBtn.addEventListener('click', rerollOdds);
     addBtn.addEventListener('click', addParticipant);
     removeBtn.addEventListener('click', removeParticipant);
