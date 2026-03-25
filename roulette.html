@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>동물 룰렛머신</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #fff8f0, #ffe8d6);
+      color: #222;
+      display: flex;
+      justify-content: center;
+      padding: 30px 15px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .slot-box {
+      background: #ffffffcc;
+      border-radius: 24px;
+      padding: 28px 20px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+      text-align: center;
+      border: 2px solid #fff;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 30px;
+    }
+
+    .machine {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .reel {
+      width: 120px;
+      height: 120px;
+      background: #fff;
+      border-radius: 20px;
+      border: 3px solid #ffd166;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 62px;
+      box-shadow: inset 0 3px 10px rgba(0,0,0,0.08);
+      transition: transform 0.15s ease;
+    }
+
+    .reel.spinning {
+      animation: shake 0.12s linear infinite;
+    }
+
+    @keyframes shake {
+      0% { transform: translateY(-2px); }
+      50% { transform: translateY(2px); }
+      100% { transform: translateY(-2px); }
+    }
+
+    .controls {
+      margin-bottom: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 26px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #ff7b54;
+      color: white;
+      box-shadow: 0 8px 18px rgba(255,123,84,0.3);
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .result {
+      min-height: 34px;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    .jackpot {
+      color: #d62828;
+      animation: pop 0.5s ease infinite alternate;
+    }
+
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+
+    .effect {
+      min-height: 40px;
+      font-size: 28px;
+      margin-bottom: 10px;
+      letter-spacing: 6px;
+    }
+
+    .stats {
+      margin-top: 22px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: left;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .stats h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: #fff8ef;
+      border: 1px solid #ffd9b8;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .card strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #666;
+    }
+
+    .card span {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    th {
+      background: #fff3e6;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .emoji-cell {
+      font-size: 28px;
+    }
+
+    @media (max-width: 640px) {
+      .reel {
+        width: 95px;
+        height: 95px;
+        font-size: 50px;
+      }
+
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="slot-box">
+      <h1>동물 룰렛머신</h1>
+
+      <div class="machine">
+        <div class="reel" id="reel1">🐶</div>
+        <div class="reel" id="reel2">🐱</div>
+        <div class="reel" id="reel3">🐰</div>
+      </div>
+
+      <div class="controls">
+        <button id="spinBtn">돌리기</button>
+      </div>
+
+      <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
+      <div class="effect" id="effectArea"></div>
+
+      <div class="stats">
+        <h2>통계판</h2>
+
+        <div class="summary">
+          <div class="card">
+            <strong>총 회전 횟수</strong>
+            <span id="totalSpins">0</span>
+          </div>
+          <div class="card">
+            <strong>잭팟 달성 횟수</strong>
+            <span id="jackpotCount">0</span>
+          </div>
+          <div class="card">
+            <strong>잭팟 확률</strong>
+            <span id="jackpotRate">0%</span>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>이모지</th>
+              <th>출현 횟수</th>
+              <th>출현 비율</th>
+            </tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
+    const reels = [
+      document.getElementById("reel1"),
+      document.getElementById("reel2"),
+      document.getElementById("reel3")
+    ];
+
+    const spinBtn = document.getElementById("spinBtn");
+    const resultText = document.getElementById("resultText");
+    const effectArea = document.getElementById("effectArea");
+
+    const totalSpinsEl = document.getElementById("totalSpins");
+    const jackpotCountEl = document.getElementById("jackpotCount");
+    const jackpotRateEl = document.getElementById("jackpotRate");
+    const statsBody = document.getElementById("statsBody");
+
+    let totalSpins = 0;
+    let jackpotCount = 0;
+    const animalCounts = {};
+
+    animals.forEach(animal => {
+      animalCounts[animal] = 0;
+    });
+
+    function getRandomAnimal() {
+      return animals[Math.floor(Math.random() * animals.length)];
+    }
+
+    function updateStats() {
+      totalSpinsEl.textContent = totalSpins;
+      jackpotCountEl.textContent = jackpotCount;
+
+      const jackpotRate = totalSpins === 0
+        ? 0
+        : ((jackpotCount / totalSpins) * 100).toFixed(2);
+
+      jackpotRateEl.textContent = `${jackpotRate}%`;
+
+      const totalSymbols = totalSpins * 3;
+
+      statsBody.innerHTML = animals.map(animal => {
+        const count = animalCounts[animal];
+        const rate = totalSymbols === 0
+          ? "0.00"
+          : ((count / totalSymbols) * 100).toFixed(2);
+
+        return `
+          <tr>
+            <td class="emoji-cell">${animal}</td>
+            <td>${count}회</td>
+            <td>${rate}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    async function spin() {
+      spinBtn.disabled = true;
+      resultText.classList.remove("jackpot");
+      effectArea.textContent = "";
+
+      reels.forEach(reel => reel.classList.add("spinning"));
+
+      const finalResults = [];
+
+      for (let i = 0; i < reels.length; i++) {
+        await new Promise(resolve => {
+          let count = 0;
+          const interval = setInterval(() => {
+            reels[i].textContent = getRandomAnimal();
+            count++;
+
+            if (count > 12 + i * 6) {
+              clearInterval(interval);
+              const finalAnimal = getRandomAnimal();
+              reels[i].textContent = finalAnimal;
+              finalResults.push(finalAnimal);
+              resolve();
+            }
+          }, 80);
+        });
+      }
+
+      reels.forEach(reel => reel.classList.remove("spinning"));
+
+      totalSpins++;
+
+      finalResults.forEach(animal => {
+        animalCounts[animal]++;
+      });
+
+      const isJackpot =
+        finalResults[0] === finalResults[1] &&
+        finalResults[1] === finalResults[2];
+
+      if (isJackpot) {
+        jackpotCount++;
+        resultText.textContent = `JACKPOT! ${finalResults[0]} ${finalResults[1]} ${finalResults[2]}`;
+        resultText.classList.add("jackpot");
+        effectArea.textContent = "🎉✨🎊💥✨🎉";
+      } else {
+        resultText.textContent = `${finalResults.join(" ")} 아쉽지만 다음 기회`;
+        effectArea.textContent = "";
+      }
+
+      updateStats();
+      spinBtn.disabled = false;
+    }
+
+    spinBtn.addEventListener("click", spin);
+
+    updateStats();
+  </script>
+</body>
+</html>
