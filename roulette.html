@@ -20,7 +20,7 @@
 
     .wrap {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
       position: relative;
       z-index: 2;
     }
@@ -88,9 +88,7 @@
       0% {
         transform: scale(1);
         border-color: #ffd166;
-        box-shadow:
-          0 0 0 rgba(255, 209, 102, 0),
-          inset 0 3px 10px rgba(0,0,0,0.08);
+        box-shadow: 0 0 0 rgba(255, 209, 102, 0), inset 0 3px 10px rgba(0,0,0,0.08);
       }
       50% {
         transform: scale(1.06);
@@ -155,6 +153,9 @@
     .effect {
       min-height: 40px;
       margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     #jackpotGif {
@@ -165,8 +166,8 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
 
-    .stats {
-      margin-top: 22px;
+    .panel {
+      margin-top: 18px;
       background: #fff;
       border-radius: 20px;
       padding: 20px;
@@ -174,7 +175,7 @@
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
     }
 
-    .stats h2 {
+    .panel h2 {
       margin: 0 0 14px;
       font-size: 22px;
     }
@@ -182,6 +183,13 @@
     .summary {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .summary-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
       margin-bottom: 18px;
     }
@@ -231,6 +239,25 @@
       font-size: 28px;
     }
 
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      background: #fff8ef;
+      border: 1px solid #ffd9b8;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 15px;
+    }
+
+    .history-empty {
+      color: #777;
+      font-size: 15px;
+    }
+
     .screen-flash {
       position: fixed;
       inset: 0;
@@ -260,7 +287,8 @@
         font-size: 50px;
       }
 
-      .summary {
+      .summary,
+      .summary-4 {
         grid-template-columns: 1fr;
       }
 
@@ -284,13 +312,12 @@
       </div>
 
       <div class="controls">
-        <button id="spinBtn">돌리기</button>
-        <button onclick="forceJackpot()">잭팟 테스트</button>
+        <button id="spinBtn">돌리기 (-10코인)</button>
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
 
-      <div class="effect" id="effectArea">
+      <div class="effect">
         <img
           id="jackpotGif"
           src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2xndHhmYTNsa251dm54djVpaWZmZTN3ZmRic2U0ZDRidWY4NWpwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mP79yI1etLU0p5Vxf1/giphy.gif"
@@ -298,7 +325,29 @@
         />
       </div>
 
-      <div class="stats">
+      <div class="panel">
+        <h2>포인트 현황</h2>
+        <div class="summary-4">
+          <div class="card">
+            <strong>보유 코인</strong>
+            <span id="coinBalance">100</span>
+          </div>
+          <div class="card">
+            <strong>사용한 코인</strong>
+            <span id="spentCoins">0</span>
+          </div>
+          <div class="card">
+            <strong>획득한 보상</strong>
+            <span id="earnedCoins">0</span>
+          </div>
+          <div class="card">
+            <strong>순손익</strong>
+            <span id="netCoins">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
         <h2>통계판</h2>
 
         <div class="summary">
@@ -327,11 +376,43 @@
           <tbody id="statsBody"></tbody>
         </table>
       </div>
+
+      <div class="panel">
+        <h2>최고 기록판</h2>
+        <div class="summary-4">
+          <div class="card">
+            <strong>최장 연속 실패</strong>
+            <span id="maxFailStreak">0</span>
+          </div>
+          <div class="card">
+            <strong>현재 연속 실패</strong>
+            <span id="currentFailStreak">0</span>
+          </div>
+          <div class="card">
+            <strong>가장 많이 나온 동물</strong>
+            <span id="mostCommonAnimal">-</span>
+          </div>
+          <div class="card">
+            <strong>최고 잔고</strong>
+            <span id="bestCoinBalance">100</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>최근 결과 히스토리</h2>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">아직 결과가 없습니다.</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
+    const spinCost = 10;
+    const jackpotReward = 100;
+    const historyLimit = 10;
 
     const reels = [
       document.getElementById("reel1"),
@@ -349,10 +430,29 @@
     const jackpotRateEl = document.getElementById("jackpotRate");
     const statsBody = document.getElementById("statsBody");
 
+    const coinBalanceEl = document.getElementById("coinBalance");
+    const spentCoinsEl = document.getElementById("spentCoins");
+    const earnedCoinsEl = document.getElementById("earnedCoins");
+    const netCoinsEl = document.getElementById("netCoins");
+
+    const maxFailStreakEl = document.getElementById("maxFailStreak");
+    const currentFailStreakEl = document.getElementById("currentFailStreak");
+    const mostCommonAnimalEl = document.getElementById("mostCommonAnimal");
+    const bestCoinBalanceEl = document.getElementById("bestCoinBalance");
+
+    const historyList = document.getElementById("historyList");
+
     let totalSpins = 0;
     let jackpotCount = 0;
-    const animalCounts = {};
+    let coinBalance = 100;
+    let spentCoins = 0;
+    let earnedCoins = 0;
+    let currentFailStreak = 0;
+    let maxFailStreak = 0;
+    let bestCoinBalance = 100;
+    const history = [];
 
+    const animalCounts = {};
     animals.forEach(animal => {
       animalCounts[animal] = 0;
     });
@@ -361,7 +461,26 @@
       return animals[Math.floor(Math.random() * animals.length)];
     }
 
+    function getMostCommonAnimal() {
+      let topAnimal = "-";
+      let topCount = 0;
+
+      animals.forEach(animal => {
+        if (animalCounts[animal] > topCount) {
+          topCount = animalCounts[animal];
+          topAnimal = animal;
+        }
+      });
+
+      return topCount === 0 ? "-" : topAnimal;
+    }
+
     function showJackpotGif() {
+      const gifSrc = jackpotGif.src;
+      jackpotGif.style.display = "none";
+      jackpotGif.src = "";
+      void jackpotGif.offsetWidth;
+      jackpotGif.src = gifSrc;
       jackpotGif.style.display = "block";
     }
 
@@ -386,6 +505,34 @@
         reel.classList.remove("jackpot-glow");
       });
       screenFlash.classList.remove("active");
+    }
+
+    function addHistory(results, isJackpot, balanceAfter) {
+      history.unshift({
+        spin: totalSpins,
+        results: [...results],
+        isJackpot,
+        balanceAfter
+      });
+
+      if (history.length > historyLimit) {
+        history.pop();
+      }
+    }
+
+    function renderHistory() {
+      if (history.length === 0) {
+        historyList.innerHTML = `<div class="history-empty">아직 결과가 없습니다.</div>`;
+        return;
+      }
+
+      historyList.innerHTML = history.map(item => `
+        <div class="history-item">
+          ${item.spin}회차 : ${item.results.join(" ")}
+          ${item.isJackpot ? ` <strong>JACKPOT (+${jackpotReward}코인)</strong>` : ``}
+          <div style="margin-top:4px; color:#666;">잔고: ${item.balanceAfter}코인</div>
+        </div>
+      `).join("");
     }
 
     function updateStats() {
@@ -416,11 +563,45 @@
       }).join("");
     }
 
+    function updateCoinPanel() {
+      coinBalanceEl.textContent = coinBalance;
+      spentCoinsEl.textContent = spentCoins;
+      earnedCoinsEl.textContent = earnedCoins;
+
+      const netCoins = earnedCoins - spentCoins;
+      netCoinsEl.textContent = netCoins > 0 ? `+${netCoins}` : `${netCoins}`;
+    }
+
+    function updateRecordPanel() {
+      maxFailStreakEl.textContent = maxFailStreak;
+      currentFailStreakEl.textContent = currentFailStreak;
+      mostCommonAnimalEl.textContent = getMostCommonAnimal();
+      bestCoinBalanceEl.textContent = bestCoinBalance;
+    }
+
+    function updateAllPanels() {
+      updateStats();
+      updateCoinPanel();
+      updateRecordPanel();
+      renderHistory();
+    }
+
     async function spin() {
+      if (coinBalance < spinCost) {
+        resultText.textContent = `코인이 부족합니다. 현재 잔고: ${coinBalance}코인`;
+        resultText.classList.remove("jackpot");
+        hideJackpotGif();
+        clearJackpotEffects();
+        return;
+      }
+
       spinBtn.disabled = true;
       resultText.classList.remove("jackpot");
       hideJackpotGif();
       clearJackpotEffects();
+
+      coinBalance -= spinCost;
+      spentCoins += spinCost;
 
       reels.forEach(reel => reel.classList.add("spinning"));
 
@@ -458,47 +639,33 @@
 
       if (isJackpot) {
         jackpotCount++;
-        resultText.textContent = `JACKPOT! ${finalResults[0]} ${finalResults[1]} ${finalResults[2]}`;
+        currentFailStreak = 0;
+        coinBalance += jackpotReward;
+        earnedCoins += jackpotReward;
+        resultText.textContent = `JACKPOT! ${finalResults[0]} ${finalResults[1]} ${finalResults[2]} (+${jackpotReward}코인)`;
         resultText.classList.add("jackpot");
         showJackpotGif();
         playJackpotEffects();
       } else {
-        resultText.textContent = `${finalResults.join(" ")} 아쉽지만 다음 기회`;
+        currentFailStreak++;
+        if (currentFailStreak > maxFailStreak) {
+          maxFailStreak = currentFailStreak;
+        }
+        resultText.textContent = `${finalResults.join(" ")} 아쉽지만 다음 기회 (-${spinCost}코인)`;
       }
 
-      updateStats();
+      if (coinBalance > bestCoinBalance) {
+        bestCoinBalance = coinBalance;
+      }
+
+      addHistory(finalResults, isJackpot, coinBalance);
+      updateAllPanels();
       spinBtn.disabled = false;
-    }
-
-    function forceJackpot() {
-      const jackpotAnimal = animals[Math.floor(Math.random() * animals.length)];
-
-      resultText.classList.remove("jackpot");
-      hideJackpotGif();
-      clearJackpotEffects();
-
-      reels.forEach(reel => {
-        reel.textContent = jackpotAnimal;
-      });
-
-      totalSpins++;
-      jackpotCount++;
-
-      for (let i = 0; i < 3; i++) {
-        animalCounts[jackpotAnimal]++;
-      }
-
-      resultText.textContent = `JACKPOT! ${jackpotAnimal} ${jackpotAnimal} ${jackpotAnimal}`;
-      resultText.classList.add("jackpot");
-      showJackpotGif();
-      playJackpotEffects();
-
-      updateStats();
     }
 
     spinBtn.addEventListener("click", spin);
 
-    updateStats();
+    updateAllPanels();
   </script>
 </body>
 </html>
