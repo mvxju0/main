@@ -104,7 +104,7 @@
 
     .participant {
       display: grid;
-      grid-template-columns: 60px 1fr auto auto;
+      grid-template-columns: 60px 1fr auto;
       gap: 10px;
       align-items: center;
       background: #fff8f1;
@@ -122,12 +122,6 @@
     .name {
       font-size: 16px;
       font-weight: bold;
-    }
-
-    .chance {
-      color: #8a5b43;
-      font-weight: bold;
-      white-space: nowrap;
     }
 
     .empty {
@@ -296,16 +290,19 @@
     .lane-wrap {
       position: relative;
       padding-right: 54px;
-      min-height: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
     }
 
     .lane {
       position: relative;
+      width: 100%;
       height: 20px;
       background: linear-gradient(90deg, #f7e7db, #fdf3ec);
       border-radius: 999px;
       overflow: visible;
-      margin-top: 10px;
+      margin-top: 0;
     }
 
     .runner {
@@ -322,7 +319,7 @@
       position: absolute;
       right: 8px;
       top: 50%;
-      transform: translateY(-50%) rotate(-4deg);
+      translate: 0 -50%;
       font-size: 28px;
       line-height: 1;
       animation: flagWave 0.55s ease-in-out infinite alternate;
@@ -334,12 +331,12 @@
 
     .finish-flag.hit {
       filter: drop-shadow(0 0 10px rgba(255, 198, 0, 0.75));
-      transform: translateY(-50%) scale(1.16) rotate(6deg);
+      transform: scale(1.16) rotate(6deg);
     }
 
     @keyframes flagWave {
-      from { transform: translateY(-50%) rotate(-6deg); }
-      to { transform: translateY(-50%) rotate(6deg); }
+      from { rotate: -6deg; }
+      to { rotate: 6deg; }
     }
 
     .result-box {
@@ -430,10 +427,6 @@
         grid-template-columns: 54px 1fr;
       }
 
-      .chance {
-        justify-self: start;
-      }
-
       .danger-btn {
         justify-self: end;
       }
@@ -454,7 +447,7 @@
     <div class="screen show" id="setupScreen">
       <div class="panel">
         <h1>애니멀런</h1>
-        <p class="sub">동물을 추가하고 예상 우승 확률을 확인한 뒤 레이스를 시작하세요.</p>
+        <p class="sub">동물을 추가한 뒤 레이스를 시작하세요.</p>
 
         <div class="guide-box">
           최소 2명부터 시작 가능 / 최대 8명까지 참가 가능<br>
@@ -467,10 +460,10 @@
         <h2 class="section-title" style="margin-top:22px;">참가자 목록</h2>
         <div class="participants" id="participantsList"></div>
         <div class="empty" id="emptyText">아직 참가자가 없습니다.</div>
-        <div class="helper" id="totalChanceText">총 예상 확률: 0%</div>
+        <div class="helper" id="participantCountText">현재 참가자: 0명</div>
 
         <div class="action-row">
-          <button id="shuffleBtn" class="ghost-btn">확률 다시 섞기</button>
+          <button id="shuffleBtn" class="ghost-btn">구성 유지하고 새 판 준비</button>
           <button id="startBtn" class="primary-wide">경주 시작</button>
         </div>
       </div>
@@ -517,8 +510,7 @@
     ];
 
     const participants = [];
-    let chanceMap = [];
-    let savedChanceMap = [];
+    let raceWeights = [];
     let currentRaceData = [];
     let raceRunning = false;
     let winnerLog = [];
@@ -529,7 +521,7 @@
     const animalGrid = document.getElementById("animalGrid");
     const participantsList = document.getElementById("participantsList");
     const emptyText = document.getElementById("emptyText");
-    const totalChanceText = document.getElementById("totalChanceText");
+    const participantCountText = document.getElementById("participantCountText");
 
     const shuffleBtn = document.getElementById("shuffleBtn");
     const startBtn = document.getElementById("startBtn");
@@ -561,30 +553,8 @@
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function normalizeChances(weights) {
-      const total = weights.reduce((a, b) => a + b, 0);
-      const raw = weights.map(w => (w / total) * 100);
-      const rounded = raw.map(v => Math.floor(v));
-      let diff = 100 - rounded.reduce((a, b) => a + b, 0);
-
-      const decimals = raw
-        .map((v, i) => ({ i, d: v - Math.floor(v) }))
-        .sort((a, b) => b.d - a.d);
-
-      for (let k = 0; k < diff; k++) {
-        rounded[decimals[k % decimals.length].i]++;
-      }
-
-      return rounded;
-    }
-
-    function assignChances() {
-      if (participants.length === 0) {
-        chanceMap = [];
-        return;
-      }
-      const weights = participants.map(() => randomInt(60, 140));
-      chanceMap = normalizeChances(weights);
+    function assignRaceWeights() {
+      raceWeights = participants.map(() => randomInt(60, 140));
     }
 
     function renderAnimalButtons() {
@@ -604,7 +574,6 @@
 
       if (participants.length === 0) {
         emptyText.style.display = "block";
-        totalChanceText.textContent = "총 예상 확률: 0%";
       } else {
         emptyText.style.display = "none";
 
@@ -614,16 +583,13 @@
           row.innerHTML = `
             <div class="emoji">${p.emoji}</div>
             <div class="name">${p.name}</div>
-            <div class="chance">예상 ${chanceMap[i]}%</div>
             <button class="danger-btn" data-index="${i}">삭제</button>
           `;
           participantsList.appendChild(row);
         });
-
-        const sum = chanceMap.reduce((a, b) => a + b, 0);
-        totalChanceText.textContent = `총 예상 확률: ${sum}%`;
       }
 
+      participantCountText.textContent = `현재 참가자: ${participants.length}명`;
       renderAnimalButtons();
     }
 
@@ -640,26 +606,26 @@
         emoji: found.emoji
       });
 
-      assignChances();
+      assignRaceWeights();
       renderParticipants();
     }
 
     function removeParticipant(index) {
       participants.splice(index, 1);
-      assignChances();
+      assignRaceWeights();
       renderParticipants();
     }
 
-    function buildRaceData(useSavedChances = false) {
-      const baseChanceMap = useSavedChances ? savedChanceMap : chanceMap;
-
+    function buildRaceData() {
       currentRaceData = participants.map((p, i) => ({
         ...p,
-        chance: baseChanceMap[i],
+        weight: raceWeights[i],
         progress: 0,
         finishedAt: null,
         rank: null,
-        hasHitFlag: false
+        hasHitFlag: false,
+        raceBoost: 0.88 + Math.random() * 0.24,
+        burstBias: Math.random() * 2 - 1
       }));
     }
 
@@ -671,7 +637,6 @@
               <div class="emoji">${p.emoji}</div>
               <div>${p.name}</div>
             </div>
-            <div>예상 우승 ${p.chance}%</div>
           </div>
           <div class="lane-wrap">
             <div class="lane" id="lane-${i}">
@@ -683,8 +648,10 @@
       `).join("");
     }
 
-    function weightedBaseSpeed(chance) {
-      return 0.16 + (chance / 100) * 0.12;
+    function weightedBaseSpeed(weight) {
+      // 내부 확률은 유지하되 체감상 과하게 고정되지 않게 스케일 축소
+      const normalized = (weight - 60) / (140 - 60); // 0~1
+      return 0.155 + normalized * 0.055;
     }
 
     function sleep(ms) {
@@ -702,8 +669,8 @@
       const flagRect = flag.getBoundingClientRect();
       const runnerWidth = runner.offsetWidth || 30;
 
-      // 깃발의 왼쪽 지점을 lane 내부 좌표로 변환
-      const flagX = flagRect.left - laneRect.left;
+      // 깃발이 트랙과 시각적으로 정확히 붙도록 약간 안쪽 보정
+      const flagX = (flagRect.left - laneRect.left) + 4;
       const maxX = Math.max(0, flagX - runnerWidth);
 
       const x = (progress / 100) * maxX;
@@ -721,17 +688,14 @@
     }
 
     function classifyRaceComment(winner, second, diffSec) {
-      if (winner.chance <= 18) {
-        return "이변 발생! 낮은 확률을 뚫고 우승했습니다.";
-      }
       if (diffSec <= 0.10) {
         return "초접전 승부! 결승선 앞에서 끝까지 뒤집혔습니다.";
       }
-      if (winner.chance >= 35) {
-        return "예상대로 강하게 밀어붙인 우승입니다.";
-      }
       if (diffSec <= 0.25) {
         return "막판 집중력이 승부를 갈랐습니다.";
+      }
+      if (winner.rank === 1) {
+        return "흐름을 잘 타고 끝까지 버틴 우승입니다.";
       }
       return "무난해 보였지만 흐름이 계속 흔들린 레이스였습니다.";
     }
@@ -767,16 +731,15 @@
       }, 700);
     }
 
-    async function startRace(useSavedChances = false) {
+    async function startRace() {
       if (participants.length < 2) {
         alert("참가자는 최소 2명 이상이어야 합니다.");
         return;
       }
       if (raceRunning) return;
 
-      if (!useSavedChances) {
-        savedChanceMap = [...chanceMap];
-      }
+      // 묻고 더블로 포함 매판 내부 확률 재조정
+      assignRaceWeights();
 
       raceRunning = true;
       resultBox.classList.remove("show");
@@ -785,7 +748,7 @@
       liveRankList.innerHTML = `<div class="live-rank-item">레이스 준비 중…</div>`;
 
       showRaceScreen();
-      buildRaceData(useSavedChances);
+      buildRaceData();
       renderTracks();
 
       currentRaceData.forEach((_, i) => updateRunnerPosition(i, 0));
@@ -813,14 +776,15 @@
         currentRaceData.forEach((p, i) => {
           if (p.finishedAt !== null) return;
 
-          let speed = weightedBaseSpeed(p.chance);
+          let speed = weightedBaseSpeed(p.weight) * p.raceBoost;
 
           if (elapsed < 2200) {
             speed += (Math.random() - 0.5) * 0.05;
           }
 
           if (p.progress > 18 && p.progress < 78) {
-            speed += (Math.random() - 0.5) * 0.45;
+            speed += (Math.random() - 0.5) * 0.55;
+            speed += Math.sin((now / 240) + p.burstBias * 2) * 0.06;
           }
 
           if (p.progress >= 78 && p.progress < 90) {
@@ -829,6 +793,15 @@
 
           const first = sortedByProgress[0];
           const second = sortedByProgress[1];
+
+          if (first && second) {
+            const leader = first;
+            if (leader && p.id !== leader.id) {
+              const gap = leader.progress - p.progress;
+              if (gap > 8) speed += 0.015;
+              if (gap > 15) speed += 0.02;
+            }
+          }
 
           if (first && second && first.progress >= 88 && second.progress >= 86) {
             if (!slowMotionTriggered) {
@@ -865,7 +838,7 @@
           const geo = updateRunnerPosition(i, p.progress);
           if (!geo) return;
 
-          // 이모지의 오른쪽 끝이 깃발 왼쪽에 닿거나 넘으면 도착
+          // 이모지 오른쪽 끝이 깃발 왼쪽을 직접 가리는 순간 도착
           if (!p.hasHitFlag && geo.runnerRight >= geo.flagX) {
             p.hasHitFlag = true;
             p.progress = 100;
@@ -881,7 +854,13 @@
           el.classList.remove("first-place", "second-place");
         });
 
-        const liveSorted = [...currentRaceData].sort((a, b) => b.progress - a.progress);
+        const liveSorted = [...currentRaceData].sort((a, b) => {
+          if (a.finishedAt !== null && b.finishedAt !== null) return a.finishedAt - b.finishedAt;
+          if (a.finishedAt !== null) return -1;
+          if (b.finishedAt !== null) return 1;
+          return b.progress - a.progress;
+        });
+
         renderLiveRank(liveSorted);
 
         if (liveSorted[0]) {
@@ -925,8 +904,8 @@
 
         resultTitle.textContent = `${winner.emoji} ${winner.name} 우승!`;
         resultSub.textContent = second
-          ? `예상 우승 확률 ${winner.chance}% · 2위와 ${diffText}`
-          : `예상 우승 확률 ${winner.chance}%`;
+          ? `2위와 ${diffText}`
+          : `단독 완주`;
 
         resultComment.textContent = classifyRaceComment(winner, second, diffSec);
 
@@ -937,7 +916,6 @@
               <div>${p.emoji}</div>
               <div>${p.name}</div>
             </div>
-            <div>예상 ${p.chance}%</div>
           </div>
         `).join("");
 
@@ -967,13 +945,11 @@
     });
 
     shuffleBtn.addEventListener("click", () => {
-      if (participants.length === 0) return;
-      assignChances();
-      renderParticipants();
+      assignRaceWeights();
     });
 
-    startBtn.addEventListener("click", () => startRace(false));
-    doubleBtn.addEventListener("click", () => startRace(true));
+    startBtn.addEventListener("click", startRace);
+    doubleBtn.addEventListener("click", startRace);
     backBtn.addEventListener("click", () => {
       if (raceRunning) return;
       showSetupScreen();
