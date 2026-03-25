@@ -255,8 +255,9 @@
       background: #fff8f1;
       border: 1px solid #ffe0cc;
       border-radius: 16px;
-      padding: 12px 14px 16px;
+      padding: 12px 14px 18px;
       overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .track.first-place {
@@ -265,6 +266,16 @@
 
     .track.second-place {
       box-shadow: 0 0 0 2px #ffcaa8 inset, 0 0 20px rgba(255, 136, 51, 0.12);
+    }
+
+    .track.finish-hit {
+      animation: finishPulse 0.55s ease 2;
+    }
+
+    @keyframes finishPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.01); box-shadow: 0 0 0 3px rgba(255, 196, 0, 0.55) inset, 0 0 24px rgba(255, 196, 0, 0.22); }
+      100% { transform: scale(1); }
     }
 
     .track-top {
@@ -284,7 +295,8 @@
 
     .lane-wrap {
       position: relative;
-      padding-right: 28px;
+      padding-right: 54px;
+      min-height: 42px;
     }
 
     .lane {
@@ -293,6 +305,7 @@
       background: linear-gradient(90deg, #f7e7db, #fdf3ec);
       border-radius: 999px;
       overflow: visible;
+      margin-top: 10px;
     }
 
     .runner {
@@ -305,19 +318,28 @@
       will-change: transform;
     }
 
-    .finish-line {
+    .finish-flag {
       position: absolute;
       right: 8px;
-      top: -4px;
-      bottom: -4px;
-      width: 8px;
-      border-radius: 999px;
-      background: repeating-linear-gradient(
-        to bottom,
-        #222 0 8px,
-        #fff 8px 16px
-      );
-      opacity: 0.28;
+      top: 50%;
+      transform: translateY(-50%) rotate(-4deg);
+      font-size: 28px;
+      line-height: 1;
+      animation: flagWave 0.55s ease-in-out infinite alternate;
+      transform-origin: bottom left;
+      z-index: 3;
+      pointer-events: none;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    .finish-flag.hit {
+      filter: drop-shadow(0 0 10px rgba(255, 198, 0, 0.75));
+      transform: translateY(-50%) scale(1.16) rotate(6deg);
+    }
+
+    @keyframes flagWave {
+      from { transform: translateY(-50%) rotate(-6deg); }
+      to { transform: translateY(-50%) rotate(6deg); }
     }
 
     .result-box {
@@ -561,7 +583,6 @@
         chanceMap = [];
         return;
       }
-
       const weights = participants.map(() => randomInt(60, 140));
       chanceMap = normalizeChances(weights);
     }
@@ -637,7 +658,8 @@
         chance: baseChanceMap[i],
         progress: 0,
         finishedAt: null,
-        rank: null
+        rank: null,
+        hasHitFlag: false
       }));
     }
 
@@ -655,7 +677,7 @@
             <div class="lane" id="lane-${i}">
               <div class="runner" id="runner-${i}">${p.emoji}</div>
             </div>
-            <div class="finish-line"></div>
+            <div class="finish-flag" id="flag-${i}">🏁</div>
           </div>
         </div>
       `).join("");
@@ -669,17 +691,33 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function updateRunnerPosition(index, progress) {
+    function getRunnerGeometry(index, progress) {
       const lane = document.getElementById(`lane-${index}`);
       const runner = document.getElementById(`runner-${index}`);
-      if (!lane || !runner) return;
+      const flag = document.getElementById(`flag-${index}`);
 
-      const laneWidth = lane.clientWidth;
-      const runnerWidth = runner.clientWidth || 30;
-      const maxX = laneWidth - runnerWidth;
+      if (!lane || !runner || !flag) return null;
+
+      const laneRect = lane.getBoundingClientRect();
+      const flagRect = flag.getBoundingClientRect();
+      const runnerWidth = runner.offsetWidth || 30;
+
+      // 깃발의 왼쪽 지점을 lane 내부 좌표로 변환
+      const flagX = flagRect.left - laneRect.left;
+      const maxX = Math.max(0, flagX - runnerWidth);
+
       const x = (progress / 100) * maxX;
+      const runnerRight = x + runnerWidth;
 
-      runner.style.transform = `translate(${x}px, -50%)`;
+      return { lane, runner, flag, x, maxX, runnerRight, flagX, runnerWidth };
+    }
+
+    function updateRunnerPosition(index, progress) {
+      const geo = getRunnerGeometry(index, progress);
+      if (!geo) return null;
+
+      geo.runner.style.transform = `translate(${geo.x}px, -50%)`;
+      return geo;
     }
 
     function classifyRaceComment(winner, second, diffSec) {
@@ -710,6 +748,23 @@
       liveRankList.innerHTML = sorted.slice(0, 4).map((p, idx) => `
         <div class="live-rank-item">${idx + 1}위 ${p.emoji} ${p.name}</div>
       `).join("");
+    }
+
+    function playFlagHitEffect(index) {
+      const flag = document.getElementById(`flag-${index}`);
+      const track = document.getElementById(`track-${index}`);
+      if (!flag || !track) return;
+
+      flag.classList.add("hit");
+      track.classList.add("finish-hit");
+
+      setTimeout(() => {
+        flag.classList.remove("hit");
+      }, 450);
+
+      setTimeout(() => {
+        track.classList.remove("finish-hit");
+      }, 700);
     }
 
     async function startRace(useSavedChances = false) {
@@ -803,14 +858,23 @@
           speed = Math.max(0.03, speed);
           p.progress += speed;
 
-          if (p.progress >= 100) {
+          if (p.progress > 100) {
             p.progress = 100;
+          }
+
+          const geo = updateRunnerPosition(i, p.progress);
+          if (!geo) return;
+
+          // 이모지의 오른쪽 끝이 깃발 왼쪽에 닿거나 넘으면 도착
+          if (!p.hasHitFlag && geo.runnerRight >= geo.flagX) {
+            p.hasHitFlag = true;
+            p.progress = 100;
+            updateRunnerPosition(i, 100);
             p.finishedAt = now;
             finishCount++;
             p.rank = finishCount;
+            playFlagHitEffect(i);
           }
-
-          updateRunnerPosition(i, p.progress);
         });
 
         document.querySelectorAll(".track").forEach(el => {
