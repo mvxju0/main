@@ -211,8 +211,10 @@
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
-      <div class="effect" id="effectArea"></div>
-
+      <div class="effect" id="effectArea">
+        <img id="jackpotGif" src="" style="display:none; max-width:100%; border-radius:12px;" />
+</div>
+      
       <div class="stats">
         <h2>통계판</h2>
 
@@ -265,7 +267,9 @@
   // 결과 출력
   resultText.textContent = `JACKPOT! ${jackpotAnimal} ${jackpotAnimal} ${jackpotAnimal}`;
   resultText.classList.add("jackpot");
-  effectArea.textContent = "🎉✨🎊💥✨🎉";
+  const gif = document.getElementById("jackpotGif");
+gif.src = "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2xndHhmYTNsa251dm54djVpaWZmZTN3ZmRic2U0ZDRidWY4NWpwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mP79yI1etLU0p5Vxf1/giphy.gif";
+gif.style.display = "block";
 
   updateStats();
 }
