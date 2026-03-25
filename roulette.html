@@ -6,6 +6,7 @@
   <title>동물 룰렛머신</title>
   <style>
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -14,11 +15,14 @@
       display: flex;
       justify-content: center;
       padding: 30px 15px;
+      overflow-x: hidden;
     }
 
     .wrap {
       width: 100%;
       max-width: 720px;
+      position: relative;
+      z-index: 2;
     }
 
     .slot-box {
@@ -28,6 +32,8 @@
       box-shadow: 0 12px 30px rgba(0,0,0,0.08);
       text-align: center;
       border: 2px solid #fff;
+      position: relative;
+      z-index: 2;
     }
 
     h1 {
@@ -54,11 +60,22 @@
       justify-content: center;
       font-size: 62px;
       box-shadow: inset 0 3px 10px rgba(0,0,0,0.08);
-      transition: transform 0.15s ease;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      position: relative;
     }
 
     .reel.spinning {
       animation: shake 0.12s linear infinite;
+    }
+
+    .reel.jackpot-glow {
+      animation: jackpotBorderFlash 0.35s ease-in-out 6;
+      border-color: #ffcf33;
+      box-shadow:
+        0 0 12px rgba(255, 207, 51, 0.9),
+        0 0 28px rgba(255, 180, 0, 0.8),
+        0 0 46px rgba(255, 120, 0, 0.6),
+        inset 0 3px 10px rgba(0,0,0,0.08);
     }
 
     @keyframes shake {
@@ -67,8 +84,39 @@
       100% { transform: translateY(-2px); }
     }
 
+    @keyframes jackpotBorderFlash {
+      0% {
+        transform: scale(1);
+        border-color: #ffd166;
+        box-shadow:
+          0 0 0 rgba(255, 209, 102, 0),
+          inset 0 3px 10px rgba(0,0,0,0.08);
+      }
+      50% {
+        transform: scale(1.06);
+        border-color: #fff36d;
+        box-shadow:
+          0 0 16px rgba(255, 243, 109, 1),
+          0 0 34px rgba(255, 191, 0, 0.95),
+          0 0 54px rgba(255, 123, 84, 0.75),
+          inset 0 3px 10px rgba(0,0,0,0.08);
+      }
+      100% {
+        transform: scale(1);
+        border-color: #ffd166;
+        box-shadow:
+          0 0 6px rgba(255, 209, 102, 0.5),
+          0 0 16px rgba(255, 191, 0, 0.35),
+          inset 0 3px 10px rgba(0,0,0,0.08);
+      }
+    }
+
     .controls {
       margin-bottom: 18px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     button {
@@ -106,9 +154,15 @@
 
     .effect {
       min-height: 40px;
-      font-size: 28px;
-      margin-bottom: 10px;
-      letter-spacing: 6px;
+      margin-bottom: 16px;
+    }
+
+    #jackpotGif {
+      display: none;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
 
     .stats {
@@ -177,6 +231,28 @@
       font-size: 28px;
     }
 
+    .screen-flash {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,245,180,0.65) 35%, rgba(255,180,120,0.25) 65%, rgba(255,255,255,0) 100%);
+      opacity: 0;
+      z-index: 9999;
+    }
+
+    .screen-flash.active {
+      animation: screenFlashAnim 0.9s ease-out;
+    }
+
+    @keyframes screenFlashAnim {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      35% { opacity: 0.75; }
+      55% { opacity: 0.95; }
+      100% { opacity: 0; }
+    }
+
     @media (max-width: 640px) {
       .reel {
         width: 95px;
@@ -195,6 +271,8 @@
   </style>
 </head>
 <body>
+  <div class="screen-flash" id="screenFlash"></div>
+
   <div class="wrap">
     <div class="slot-box">
       <h1>동물 룰렛머신</h1>
@@ -211,10 +289,15 @@
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
+
       <div class="effect" id="effectArea">
-        <img id="jackpotGif" src="" style="display:none; max-width:100%; border-radius:12px;" />
-</div>
-      
+        <img
+          id="jackpotGif"
+          src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2xndHhmYTNsa251dm54djVpaWZmZTN3ZmRic2U0ZDRidWY4NWpwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mP79yI1etLU0p5Vxf1/giphy.gif"
+          alt="잭팟 GIF"
+        />
+      </div>
+
       <div class="stats">
         <h2>통계판</h2>
 
@@ -248,32 +331,8 @@
   </div>
 
   <script>
-    function forceJackpot() {
-  const jackpotAnimal = animals[Math.floor(Math.random() * animals.length)];
-
-  // 화면 강제 세팅
-  reels.forEach(reel => {
-    reel.textContent = jackpotAnimal;
-  });
-
-  // 통계 처리
-  totalSpins++;
-  jackpotCount++;
-
-  for (let i = 0; i < 3; i++) {
-    animalCounts[jackpotAnimal]++;
-  }
-
-  // 결과 출력
-  resultText.textContent = `JACKPOT! ${jackpotAnimal} ${jackpotAnimal} ${jackpotAnimal}`;
-  resultText.classList.add("jackpot");
-  const gif = document.getElementById("jackpotGif");
-gif.src = "https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2xndHhmYTNsa251dm54djVpaWZmZTN3ZmRic2U0ZDRidWY4NWpwZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/mP79yI1etLU0p5Vxf1/giphy.gif";
-gif.style.display = "block";
-
-  updateStats();
-}
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
+
     const reels = [
       document.getElementById("reel1"),
       document.getElementById("reel2"),
@@ -282,7 +341,8 @@ gif.style.display = "block";
 
     const spinBtn = document.getElementById("spinBtn");
     const resultText = document.getElementById("resultText");
-    const effectArea = document.getElementById("effectArea");
+    const jackpotGif = document.getElementById("jackpotGif");
+    const screenFlash = document.getElementById("screenFlash");
 
     const totalSpinsEl = document.getElementById("totalSpins");
     const jackpotCountEl = document.getElementById("jackpotCount");
@@ -299,6 +359,33 @@ gif.style.display = "block";
 
     function getRandomAnimal() {
       return animals[Math.floor(Math.random() * animals.length)];
+    }
+
+    function showJackpotGif() {
+      jackpotGif.style.display = "block";
+    }
+
+    function hideJackpotGif() {
+      jackpotGif.style.display = "none";
+    }
+
+    function playJackpotEffects() {
+      reels.forEach(reel => {
+        reel.classList.remove("jackpot-glow");
+        void reel.offsetWidth;
+        reel.classList.add("jackpot-glow");
+      });
+
+      screenFlash.classList.remove("active");
+      void screenFlash.offsetWidth;
+      screenFlash.classList.add("active");
+    }
+
+    function clearJackpotEffects() {
+      reels.forEach(reel => {
+        reel.classList.remove("jackpot-glow");
+      });
+      screenFlash.classList.remove("active");
     }
 
     function updateStats() {
@@ -332,7 +419,8 @@ gif.style.display = "block";
     async function spin() {
       spinBtn.disabled = true;
       resultText.classList.remove("jackpot");
-      effectArea.textContent = "";
+      hideJackpotGif();
+      clearJackpotEffects();
 
       reels.forEach(reel => reel.classList.add("spinning"));
 
@@ -372,14 +460,40 @@ gif.style.display = "block";
         jackpotCount++;
         resultText.textContent = `JACKPOT! ${finalResults[0]} ${finalResults[1]} ${finalResults[2]}`;
         resultText.classList.add("jackpot");
-        effectArea.textContent = "🎉✨🎊💥✨🎉";
+        showJackpotGif();
+        playJackpotEffects();
       } else {
         resultText.textContent = `${finalResults.join(" ")} 아쉽지만 다음 기회`;
-        effectArea.textContent = "";
       }
 
       updateStats();
       spinBtn.disabled = false;
+    }
+
+    function forceJackpot() {
+      const jackpotAnimal = animals[Math.floor(Math.random() * animals.length)];
+
+      resultText.classList.remove("jackpot");
+      hideJackpotGif();
+      clearJackpotEffects();
+
+      reels.forEach(reel => {
+        reel.textContent = jackpotAnimal;
+      });
+
+      totalSpins++;
+      jackpotCount++;
+
+      for (let i = 0; i < 3; i++) {
+        animalCounts[jackpotAnimal]++;
+      }
+
+      resultText.textContent = `JACKPOT! ${jackpotAnimal} ${jackpotAnimal} ${jackpotAnimal}`;
+      resultText.classList.add("jackpot");
+      showJackpotGif();
+      playJackpotEffects();
+
+      updateStats();
     }
 
     spinBtn.addEventListener("click", spin);
