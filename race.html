@@ -12,18 +12,26 @@
       font-family: Arial, sans-serif;
       background: linear-gradient(180deg, #fff9f2, #ffe8d9);
       color: #222;
-      padding: 24px 14px 40px;
+      padding: 20px 14px 32px;
     }
 
     .wrap {
       width: 100%;
-      max-width: 900px;
+      max-width: 920px;
       margin: 0 auto;
     }
 
+    .screen {
+      display: none;
+    }
+
+    .screen.show {
+      display: block;
+    }
+
     .panel {
-      background: rgba(255,255,255,0.92);
-      border-radius: 22px;
+      background: rgba(255,255,255,0.94);
+      border-radius: 24px;
       padding: 20px;
       box-shadow: 0 10px 28px rgba(0,0,0,0.08);
       margin-bottom: 16px;
@@ -42,28 +50,96 @@
       font-size: 15px;
     }
 
-    .input-row {
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 20px;
+    }
+
+    .animal-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .animal-btn {
+      border: 1px solid #ffd8c4;
+      background: #fff8f1;
+      color: #7a4b33;
+      border-radius: 16px;
+      padding: 14px 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .animal-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255,123,84,0.12);
+    }
+
+    .animal-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .participants {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .participant {
+      display: grid;
+      grid-template-columns: 60px 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 14px;
+      padding: 12px 14px;
+    }
+
+    .emoji {
+      font-size: 30px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .name {
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .chance {
+      color: #8a5b43;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .empty {
+      text-align: center;
+      color: #777;
+      padding: 20px 0 8px;
+    }
+
+    .helper {
+      margin-top: 12px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .action-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin-top: 16px;
     }
 
-    input, button {
-      font: inherit;
-    }
-
-    input {
-      flex: 1;
-      min-width: 200px;
-      height: 48px;
-      border: 1px solid #e4d5c9;
-      border-radius: 14px;
-      padding: 0 14px;
-      background: #fff;
-    }
-
     button {
+      font: inherit;
       border: 0;
       border-radius: 14px;
       padding: 0 18px;
@@ -72,11 +148,17 @@
       cursor: pointer;
       background: #ff7b54;
       color: #fff;
-      transition: transform 0.15s ease, opacity 0.15s ease;
+      transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
     }
 
-    button:hover { transform: translateY(-1px); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     .ghost-btn {
       background: #fff3ea;
@@ -93,66 +175,16 @@
       padding: 0 12px;
     }
 
-    .participants {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .participant {
-      display: grid;
-      grid-template-columns: 56px 1fr auto auto;
-      gap: 10px;
-      align-items: center;
-      background: #fff8f1;
-      border: 1px solid #ffe0cc;
-      border-radius: 14px;
-      padding: 12px 14px;
-    }
-
-    .emoji {
-      font-size: 30px;
-      text-align: center;
-    }
-
-    .name {
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .chance {
-      color: #8a5b43;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-
-    .helper {
-      margin-top: 12px;
-      color: #666;
-      font-size: 14px;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-
-    .race-wrap {
-      display: none;
-    }
-
-    .race-wrap.show {
-      display: block;
+    .primary-wide {
+      flex: 1;
+      min-width: 220px;
     }
 
     .race-status {
       text-align: center;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
-      min-height: 30px;
+      min-height: 34px;
       margin-bottom: 14px;
     }
 
@@ -173,7 +205,7 @@
     .track-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .track {
@@ -181,8 +213,16 @@
       background: #fff8f1;
       border: 1px solid #ffe0cc;
       border-radius: 16px;
-      padding: 12px 12px 16px;
+      padding: 12px 14px 16px;
       overflow: hidden;
+    }
+
+    .track.first-place {
+      box-shadow: 0 0 0 2px #ffd86f inset, 0 0 20px rgba(255, 204, 0, 0.18);
+    }
+
+    .track.second-place {
+      box-shadow: 0 0 0 2px #ffcaa8 inset, 0 0 20px rgba(255, 136, 51, 0.12);
     }
 
     .track-top {
@@ -200,13 +240,14 @@
       font-weight: bold;
     }
 
-    .track-name .emoji {
-      font-size: 28px;
+    .lane-wrap {
+      position: relative;
+      padding-right: 28px;
     }
 
     .lane {
       position: relative;
-      height: 18px;
+      height: 20px;
       background: linear-gradient(90deg, #f7e7db, #fdf3ec);
       border-radius: 999px;
       overflow: visible;
@@ -216,33 +257,25 @@
       position: absolute;
       top: 50%;
       left: 0;
-      transform: translate(-8px, -50%);
-      font-size: 28px;
-      transition: transform 0.08s linear;
+      font-size: 30px;
+      line-height: 1;
+      transform: translate(0, -50%);
       will-change: transform;
     }
 
     .finish-line {
       position: absolute;
       right: 8px;
-      top: 8px;
-      bottom: 8px;
-      width: 6px;
+      top: -4px;
+      bottom: -4px;
+      width: 8px;
       border-radius: 999px;
       background: repeating-linear-gradient(
         to bottom,
         #222 0 8px,
         #fff 8px 16px
       );
-      opacity: 0.22;
-    }
-
-    .track.first-place {
-      box-shadow: 0 0 0 2px #ffd86f inset, 0 0 20px rgba(255, 204, 0, 0.18);
-    }
-
-    .track.second-place {
-      box-shadow: 0 0 0 2px #ffcaa8 inset, 0 0 20px rgba(255, 136, 51, 0.12);
+      opacity: 0.28;
     }
 
     .result-box {
@@ -266,8 +299,15 @@
 
     .result-sub {
       color: #6a5a50;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       font-size: 15px;
+    }
+
+    .result-comment {
+      color: #b45533;
+      font-weight: bold;
+      margin-bottom: 14px;
+      font-size: 16px;
     }
 
     .ranking {
@@ -295,8 +335,15 @@
       font-weight: bold;
     }
 
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
     .double-btn {
-      width: 100%;
+      flex: 1;
+      min-width: 220px;
       font-size: 18px;
       height: 54px;
       border-radius: 16px;
@@ -304,15 +351,19 @@
       box-shadow: 0 10px 24px rgba(255,107,61,0.28);
     }
 
-    .empty {
-      text-align: center;
-      color: #777;
-      padding: 18px 0 8px;
+    .history-mini {
+      margin-top: 8px;
+      color: #7a655b;
+      font-size: 14px;
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 760px) {
+      .animal-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
       .participant {
-        grid-template-columns: 50px 1fr;
+        grid-template-columns: 54px 1fr;
       }
 
       .chance {
@@ -332,72 +383,101 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="panel">
-      <h1>애니멀런</h1>
-      <p class="sub">참가자를 추가하고, 확률을 확인한 뒤, 한 화면에서 같이 보는 레이스를 시작하세요.</p>
+    <!-- 설정 화면 -->
+    <div class="screen show" id="setupScreen">
+      <div class="panel">
+        <h1>애니멀런</h1>
+        <p class="sub">동물을 추가하고 예상 우승 확률을 확인한 뒤 레이스를 시작하세요.</p>
 
-      <div class="input-row">
-        <input id="nameInput" type="text" placeholder="참가자 이름 입력" maxlength="12" />
-        <button id="addBtn">참가자 추가</button>
-        <button id="shuffleBtn" class="ghost-btn">확률 다시 섞기</button>
-      </div>
+        <h2 class="section-title" style="margin-top:20px;">참가자 추가</h2>
+        <div class="animal-grid" id="animalGrid"></div>
 
-      <div class="participants" id="participantsList"></div>
-      <div class="empty" id="emptyText">아직 참가자가 없습니다.</div>
+        <h2 class="section-title" style="margin-top:22px;">참가자 목록</h2>
+        <div class="participants" id="participantsList"></div>
+        <div class="empty" id="emptyText">아직 참가자가 없습니다.</div>
+        <div class="helper" id="totalChanceText">총 예상 확률: 0%</div>
 
-      <div class="helper" id="totalChanceText">총 예상 확률: 0%</div>
-
-      <div class="action-row">
-        <button id="startBtn">레이스 시작</button>
+        <div class="action-row">
+          <button id="shuffleBtn" class="ghost-btn">확률 다시 섞기</button>
+          <button id="startBtn" class="primary-wide">경주 시작</button>
+        </div>
       </div>
     </div>
 
-    <div class="panel race-wrap" id="raceWrap">
-      <div class="race-status" id="raceStatus">출발 준비 중…</div>
-      <div class="track-list" id="trackList"></div>
+    <!-- 레이스 화면 -->
+    <div class="screen" id="raceScreen">
+      <div class="panel">
+        <div class="race-status" id="raceStatus">출발 준비 중…</div>
+        <div class="track-list" id="trackList"></div>
 
-      <div class="result-box" id="resultBox">
-        <div class="result-title" id="resultTitle"></div>
-        <div class="result-sub" id="resultSub"></div>
-        <div class="ranking" id="ranking"></div>
-        <button class="double-btn" id="doubleBtn">묻고 더블로 🔥</button>
+        <div class="result-box" id="resultBox">
+          <div class="result-title" id="resultTitle"></div>
+          <div class="result-sub" id="resultSub"></div>
+          <div class="result-comment" id="resultComment"></div>
+          <div class="ranking" id="ranking"></div>
+          <div class="result-actions">
+            <button class="double-btn" id="doubleBtn">묻고 더블로 🔥</button>
+            <button class="ghost-btn" id="backBtn">설정으로 돌아가기</button>
+          </div>
+          <div class="history-mini" id="winnerHistory"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const animalPool = ["🐶", "🐱", "🐰", "🦊", "🐼", "🐸", "🐵", "🐯", "🐹", "🐻"];
+    const animalOptions = [
+      { name: "강아지", emoji: "🐶" },
+      { name: "고양이", emoji: "🐱" },
+      { name: "토끼", emoji: "🐰" },
+      { name: "여우", emoji: "🦊" },
+      { name: "곰", emoji: "🐻" },
+      { name: "원숭이", emoji: "🐵" },
+      { name: "개구리", emoji: "🐸" },
+      { name: "판다", emoji: "🐼" }
+    ];
+
     const participants = [];
     let chanceMap = [];
-    let raceRunning = false;
     let currentRaceData = [];
+    let raceRunning = false;
+    let winnerLog = [];
 
-    const nameInput = document.getElementById("nameInput");
-    const addBtn = document.getElementById("addBtn");
-    const shuffleBtn = document.getElementById("shuffleBtn");
-    const startBtn = document.getElementById("startBtn");
+    const setupScreen = document.getElementById("setupScreen");
+    const raceScreen = document.getElementById("raceScreen");
+
+    const animalGrid = document.getElementById("animalGrid");
     const participantsList = document.getElementById("participantsList");
     const emptyText = document.getElementById("emptyText");
     const totalChanceText = document.getElementById("totalChanceText");
 
-    const raceWrap = document.getElementById("raceWrap");
-    const trackList = document.getElementById("trackList");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const startBtn = document.getElementById("startBtn");
+
     const raceStatus = document.getElementById("raceStatus");
+    const trackList = document.getElementById("trackList");
     const resultBox = document.getElementById("resultBox");
     const resultTitle = document.getElementById("resultTitle");
     const resultSub = document.getElementById("resultSub");
+    const resultComment = document.getElementById("resultComment");
     const ranking = document.getElementById("ranking");
     const doubleBtn = document.getElementById("doubleBtn");
+    const backBtn = document.getElementById("backBtn");
+    const winnerHistory = document.getElementById("winnerHistory");
+
+    function showSetupScreen() {
+      setupScreen.classList.add("show");
+      raceScreen.classList.remove("show");
+    }
+
+    function showRaceScreen() {
+      setupScreen.classList.remove("show");
+      raceScreen.classList.add("show");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
     function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    function getUnusedEmoji() {
-      const used = participants.map(p => p.emoji);
-      const available = animalPool.filter(a => !used.includes(a));
-      if (available.length > 0) return available[Math.floor(Math.random() * available.length)];
-      return animalPool[Math.floor(Math.random() * animalPool.length)];
     }
 
     function normalizeChances(weights) {
@@ -406,12 +486,14 @@
       const rounded = raw.map(v => Math.floor(v));
       let diff = 100 - rounded.reduce((a, b) => a + b, 0);
 
-      const decimals = raw.map((v, i) => ({ i, d: v - Math.floor(v) }))
+      const decimals = raw
+        .map((v, i) => ({ i, d: v - Math.floor(v) }))
         .sort((a, b) => b.d - a.d);
 
       for (let k = 0; k < diff; k++) {
         rounded[decimals[k % decimals.length].i]++;
       }
+
       return rounded;
     }
 
@@ -420,8 +502,21 @@
         chanceMap = [];
         return;
       }
+
       const weights = participants.map(() => randomInt(60, 140));
       chanceMap = normalizeChances(weights);
+    }
+
+    function renderAnimalButtons() {
+      animalGrid.innerHTML = animalOptions.map((animal) => {
+        const count = participants.filter(p => p.name === animal.name).length;
+        const disabled = participants.length >= 8;
+        return `
+          <button class="animal-btn" data-name="${animal.name}" ${disabled ? "disabled" : ""}>
+            ${animal.emoji} ${animal.name} 추가
+          </button>
+        `;
+      }).join("");
     }
 
     function renderParticipants() {
@@ -430,45 +525,41 @@
       if (participants.length === 0) {
         emptyText.style.display = "block";
         totalChanceText.textContent = "총 예상 확률: 0%";
-        return;
+      } else {
+        emptyText.style.display = "none";
+
+        participants.forEach((p, i) => {
+          const row = document.createElement("div");
+          row.className = "participant";
+          row.innerHTML = `
+            <div class="emoji">${p.emoji}</div>
+            <div class="name">${p.name}</div>
+            <div class="chance">예상 ${chanceMap[i]}%</div>
+            <button class="danger-btn" data-index="${i}">삭제</button>
+          `;
+          participantsList.appendChild(row);
+        });
+
+        const sum = chanceMap.reduce((a, b) => a + b, 0);
+        totalChanceText.textContent = `총 예상 확률: ${sum}%`;
       }
 
-      emptyText.style.display = "none";
-
-      participants.forEach((p, i) => {
-        const row = document.createElement("div");
-        row.className = "participant";
-        row.innerHTML = `
-          <div class="emoji">${p.emoji}</div>
-          <div class="name">${p.name}</div>
-          <div class="chance">예상 ${chanceMap[i]}%</div>
-          <button class="danger-btn" data-index="${i}">삭제</button>
-        `;
-        participantsList.appendChild(row);
-      });
-
-      const sum = chanceMap.reduce((a, b) => a + b, 0);
-      totalChanceText.textContent = `총 예상 확률: ${sum}%`;
+      renderAnimalButtons();
     }
 
-    function addParticipant() {
-      const name = nameInput.value.trim();
-      if (!name) return;
-      if (participants.length >= 8) {
-        alert("참가자는 최대 8명까지 가능합니다.");
-        return;
-      }
+    function addParticipantByAnimal(name) {
+      if (participants.length >= 8) return;
+      const found = animalOptions.find(a => a.name === name);
+      if (!found) return;
 
       participants.push({
         id: Date.now() + Math.random(),
-        name,
-        emoji: getUnusedEmoji()
+        name: found.name,
+        emoji: found.emoji
       });
 
       assignChances();
       renderParticipants();
-      nameInput.value = "";
-      nameInput.focus();
     }
 
     function removeParticipant(index) {
@@ -489,13 +580,8 @@
     }
 
     function renderTracks() {
-      trackList.innerHTML = "";
-      currentRaceData.forEach((p, i) => {
-        const track = document.createElement("div");
-        track.className = "track";
-        track.id = `track-${i}`;
-        track.innerHTML = `
-          <div class="finish-line"></div>
+      trackList.innerHTML = currentRaceData.map((p, i) => `
+        <div class="track" id="track-${i}">
           <div class="track-top">
             <div class="track-name">
               <div class="emoji">${p.emoji}</div>
@@ -503,20 +589,59 @@
             </div>
             <div>예상 우승 ${p.chance}%</div>
           </div>
-          <div class="lane">
-            <div class="runner" id="runner-${i}">${p.emoji}</div>
+          <div class="lane-wrap">
+            <div class="lane" id="lane-${i}">
+              <div class="runner" id="runner-${i}">${p.emoji}</div>
+            </div>
+            <div class="finish-line"></div>
           </div>
-        `;
-        trackList.appendChild(track);
-      });
+        </div>
+      `).join("");
     }
 
     function weightedBaseSpeed(chance) {
-      return 0.45 + (chance / 100) * 0.35;
+      return 0.48 + (chance / 100) * 0.34;
     }
 
     function sleep(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updateRunnerPosition(index, progress) {
+      const lane = document.getElementById(`lane-${index}`);
+      const runner = document.getElementById(`runner-${index}`);
+      if (!lane || !runner) return;
+
+      const laneWidth = lane.clientWidth;
+      const runnerWidth = runner.clientWidth || 30;
+      const maxX = laneWidth - runnerWidth;
+      const x = (progress / 100) * maxX;
+
+      runner.style.transform = `translate(${x}px, -50%)`;
+    }
+
+    function classifyRaceComment(winner, second, diffSec) {
+      if (winner.chance <= 18) {
+        return "이변 발생! 낮은 확률을 뚫고 우승했습니다.";
+      }
+      if (diffSec <= 0.10) {
+        return "초접전 승부! 결승선 앞에서 끝까지 뒤집혔습니다.";
+      }
+      if (winner.chance >= 35) {
+        return "예상대로 강하게 밀어붙인 우승입니다.";
+      }
+      if (diffSec <= 0.25) {
+        return "막판 집중력이 승부를 갈랐습니다.";
+      }
+      return "무난해 보였지만 흐름이 계속 흔들린 레이스였습니다.";
+    }
+
+    function updateWinnerHistory() {
+      if (winnerLog.length === 0) {
+        winnerHistory.textContent = "";
+        return;
+      }
+      winnerHistory.textContent = `최근 우승: ${winnerLog.slice(-5).reverse().join(" → ")}`;
     }
 
     async function startRace() {
@@ -528,12 +653,14 @@
 
       raceRunning = true;
       resultBox.classList.remove("show");
-      raceWrap.classList.add("show");
-      raceStatus.textContent = "출발 준비 중…";
       raceStatus.classList.remove("hot", "finish");
+      raceStatus.textContent = "출발 준비 중…";
 
+      showRaceScreen();
       buildRaceData();
       renderTracks();
+
+      currentRaceData.forEach((_, i) => updateRunnerPosition(i, 0));
 
       await sleep(500);
       raceStatus.textContent = "3";
@@ -549,11 +676,10 @@
       let finishCount = 0;
       let animationFrame = null;
       let nearFinishTriggered = false;
+      let slowMotionTriggered = false;
 
       function frame(now) {
         const elapsed = now - raceStart;
-
-        const unfinished = currentRaceData.filter(p => p.finishedAt === null);
         const sortedByProgress = [...currentRaceData].sort((a, b) => b.progress - a.progress);
 
         currentRaceData.forEach((p, i) => {
@@ -561,30 +687,35 @@
 
           let speed = weightedBaseSpeed(p.chance);
 
-          // 초반은 비교적 안정
           if (elapsed < 1800) {
             speed += (Math.random() - 0.5) * 0.12;
           }
 
-          // 중반 혼전: 속도 크게 요동
           if (p.progress > 18 && p.progress < 78) {
             speed += (Math.random() - 0.5) * 1.35;
           }
 
-          // 후반 들어가면 약간 조심스러워짐
-          if (p.progress >= 78 && p.progress < 92) {
+          if (p.progress >= 78 && p.progress < 90) {
             speed += (Math.random() - 0.5) * 0.7;
           }
 
-          // 결승선 앞 1,2등 왔다갔다
           const first = sortedByProgress[0];
           const second = sortedByProgress[1];
+
+          if (first && second && first.progress >= 88 && second.progress >= 86) {
+            if (!slowMotionTriggered) {
+              raceStatus.textContent = "막판 승부, 속도가 흔들립니다!";
+              raceStatus.classList.add("hot");
+            }
+            slowMotionTriggered = true;
+          }
 
           if (p.progress >= 90 && first && second) {
             const isTopTwo = p.id === first.id || p.id === second.id;
             if (isTopTwo) {
               const swing = Math.sin(now / 120) * 1.1;
               speed += swing;
+              speed *= 0.72;
 
               if (!nearFinishTriggered) {
                 raceStatus.textContent = "결승선 앞 초접전!";
@@ -592,11 +723,11 @@
               }
               nearFinishTriggered = true;
             } else {
-              speed *= 0.7;
+              speed *= 0.62;
             }
           }
 
-          speed = Math.max(0.08, speed);
+          speed = Math.max(0.06, speed);
           p.progress += speed;
 
           if (p.progress >= 100) {
@@ -606,11 +737,9 @@
             p.rank = finishCount;
           }
 
-          const runner = document.getElementById(`runner-${i}`);
-          runner.style.transform = `translate(calc(${p.progress}% - 8px), -50%)`;
+          updateRunnerPosition(i, p.progress);
         });
 
-        // 상위 2명 하이라이트
         document.querySelectorAll(".track").forEach(el => {
           el.classList.remove("first-place", "second-place");
         });
@@ -648,16 +777,19 @@
         raceStatus.classList.add("finish");
         raceStatus.textContent = `${winner.emoji} ${winner.name} 우승!`;
 
+        let diffSec = 0;
         let diffText = "";
         if (winner && second && winner.finishedAt && second.finishedAt) {
-          const sec = ((second.finishedAt - winner.finishedAt) / 1000).toFixed(2);
-          diffText = `${sec}초 차이`;
+          diffSec = Number(((second.finishedAt - winner.finishedAt) / 1000).toFixed(2));
+          diffText = `${diffSec.toFixed(2)}초 차이`;
         }
 
         resultTitle.textContent = `${winner.emoji} ${winner.name} 우승!`;
         resultSub.textContent = second
-          ? `${winner.chance}% 예상 우승 확률 · 2위와 ${diffText}`
-          : `${winner.chance}% 예상 우승 확률`;
+          ? `예상 우승 확률 ${winner.chance}% · 2위와 ${diffText}`
+          : `예상 우승 확률 ${winner.chance}%`;
+
+        resultComment.textContent = classifyRaceComment(winner, second, diffSec);
 
         ranking.innerHTML = result.map((p, idx) => `
           <div class="ranking-item">
@@ -670,20 +802,19 @@
           </div>
         `).join("");
 
+        winnerLog.push(`${winner.emoji} ${winner.name}`);
+        updateWinnerHistory();
         resultBox.classList.add("show");
       }
 
       requestAnimationFrame(frame);
     }
 
-    addBtn.addEventListener("click", addParticipant);
-    shuffleBtn.addEventListener("click", () => {
-      if (participants.length === 0) return;
-      assignChances();
-      renderParticipants();
+    animalGrid.addEventListener("click", (e) => {
+      const btn = e.target.closest(".animal-btn");
+      if (!btn) return;
+      addParticipantByAnimal(btn.dataset.name);
     });
-
-    startBtn.addEventListener("click", startRace);
 
     participantsList.addEventListener("click", (e) => {
       const btn = e.target.closest(".danger-btn");
@@ -691,23 +822,21 @@
       removeParticipant(Number(btn.dataset.index));
     });
 
-    nameInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") addParticipant();
+    shuffleBtn.addEventListener("click", () => {
+      if (participants.length === 0) return;
+      assignChances();
+      renderParticipants();
     });
 
-    doubleBtn.addEventListener("click", () => {
-      startRace();
+    startBtn.addEventListener("click", startRace);
+    doubleBtn.addEventListener("click", startRace);
+    backBtn.addEventListener("click", () => {
+      if (raceRunning) return;
+      showSetupScreen();
     });
 
-    // 기본 샘플
-    ["토끼", "강아지", "고양이", "여우"].forEach(name => {
-      participants.push({
-        id: Date.now() + Math.random(),
-        name,
-        emoji: getUnusedEmoji()
-      });
-    });
-    assignChances();
+    // 초기 버튼 렌더
+    renderAnimalButtons();
     renderParticipants();
   </script>
 </body>
