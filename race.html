@@ -55,6 +55,17 @@
       font-size: 20px;
     }
 
+    .guide-box {
+      margin-top: 16px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #7a5b4a;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
     .animal-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -200,6 +211,37 @@
     @keyframes blink {
       from { opacity: 0.68; transform: scale(1); }
       to { opacity: 1; transform: scale(1.02); }
+    }
+
+    .live-rank-box {
+      margin-bottom: 14px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .live-rank-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: #7a5b4a;
+      margin-bottom: 8px;
+    }
+
+    .live-rank-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .live-rank-item {
+      background: #fff;
+      border: 1px solid #f2dfd0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #6f5547;
     }
 
     .track-list {
@@ -378,18 +420,26 @@
         flex-direction: column;
         align-items: flex-start;
       }
+
+      .live-rank-list {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- 설정 화면 -->
     <div class="screen show" id="setupScreen">
       <div class="panel">
         <h1>애니멀런</h1>
         <p class="sub">동물을 추가하고 예상 우승 확률을 확인한 뒤 레이스를 시작하세요.</p>
 
-        <h2 class="section-title" style="margin-top:20px;">참가자 추가</h2>
+        <div class="guide-box">
+          최소 2명부터 시작 가능 / 최대 8명까지 참가 가능<br>
+          같은 동물은 한 번만 선택할 수 있습니다.
+        </div>
+
+        <h2 class="section-title" style="margin-top:20px;">참가자 선택</h2>
         <div class="animal-grid" id="animalGrid"></div>
 
         <h2 class="section-title" style="margin-top:22px;">참가자 목록</h2>
@@ -404,10 +454,17 @@
       </div>
     </div>
 
-    <!-- 레이스 화면 -->
     <div class="screen" id="raceScreen">
       <div class="panel">
         <div class="race-status" id="raceStatus">출발 준비 중…</div>
+
+        <div class="live-rank-box">
+          <div class="live-rank-title">현재 순위</div>
+          <div class="live-rank-list" id="liveRankList">
+            <div class="live-rank-item">레이스 시작 전입니다.</div>
+          </div>
+        </div>
+
         <div class="track-list" id="trackList"></div>
 
         <div class="result-box" id="resultBox">
@@ -439,6 +496,7 @@
 
     const participants = [];
     let chanceMap = [];
+    let savedChanceMap = [];
     let currentRaceData = [];
     let raceRunning = false;
     let winnerLog = [];
@@ -456,6 +514,7 @@
 
     const raceStatus = document.getElementById("raceStatus");
     const trackList = document.getElementById("trackList");
+    const liveRankList = document.getElementById("liveRankList");
     const resultBox = document.getElementById("resultBox");
     const resultTitle = document.getElementById("resultTitle");
     const resultSub = document.getElementById("resultSub");
@@ -509,11 +568,11 @@
 
     function renderAnimalButtons() {
       animalGrid.innerHTML = animalOptions.map((animal) => {
-        const count = participants.filter(p => p.name === animal.name).length;
-        const disabled = participants.length >= 8;
+        const alreadySelected = participants.some(p => p.name === animal.name);
+        const disabled = participants.length >= 8 || alreadySelected;
         return `
           <button class="animal-btn" data-name="${animal.name}" ${disabled ? "disabled" : ""}>
-            ${animal.emoji} ${animal.name} 추가
+            ${animal.emoji} ${animal.name}
           </button>
         `;
       }).join("");
@@ -549,6 +608,8 @@
 
     function addParticipantByAnimal(name) {
       if (participants.length >= 8) return;
+      if (participants.some(p => p.name === name)) return;
+
       const found = animalOptions.find(a => a.name === name);
       if (!found) return;
 
@@ -568,12 +629,13 @@
       renderParticipants();
     }
 
-    function buildRaceData() {
+    function buildRaceData(useSavedChances = false) {
+      const baseChanceMap = useSavedChances ? savedChanceMap : chanceMap;
+
       currentRaceData = participants.map((p, i) => ({
         ...p,
-        chance: chanceMap[i],
+        chance: baseChanceMap[i],
         progress: 0,
-        speed: 0,
         finishedAt: null,
         rank: null
       }));
@@ -600,7 +662,7 @@
     }
 
     function weightedBaseSpeed(chance) {
-      return 0.48 + (chance / 100) * 0.34;
+      return 0.16 + (chance / 100) * 0.12;
     }
 
     function sleep(ms) {
@@ -644,20 +706,31 @@
       winnerHistory.textContent = `최근 우승: ${winnerLog.slice(-5).reverse().join(" → ")}`;
     }
 
-    async function startRace() {
+    function renderLiveRank(sorted) {
+      liveRankList.innerHTML = sorted.slice(0, 4).map((p, idx) => `
+        <div class="live-rank-item">${idx + 1}위 ${p.emoji} ${p.name}</div>
+      `).join("");
+    }
+
+    async function startRace(useSavedChances = false) {
       if (participants.length < 2) {
         alert("참가자는 최소 2명 이상이어야 합니다.");
         return;
       }
       if (raceRunning) return;
 
+      if (!useSavedChances) {
+        savedChanceMap = [...chanceMap];
+      }
+
       raceRunning = true;
       resultBox.classList.remove("show");
       raceStatus.classList.remove("hot", "finish");
       raceStatus.textContent = "출발 준비 중…";
+      liveRankList.innerHTML = `<div class="live-rank-item">레이스 준비 중…</div>`;
 
       showRaceScreen();
-      buildRaceData();
+      buildRaceData(useSavedChances);
       renderTracks();
 
       currentRaceData.forEach((_, i) => updateRunnerPosition(i, 0));
@@ -687,16 +760,16 @@
 
           let speed = weightedBaseSpeed(p.chance);
 
-          if (elapsed < 1800) {
-            speed += (Math.random() - 0.5) * 0.12;
+          if (elapsed < 2200) {
+            speed += (Math.random() - 0.5) * 0.05;
           }
 
           if (p.progress > 18 && p.progress < 78) {
-            speed += (Math.random() - 0.5) * 1.35;
+            speed += (Math.random() - 0.5) * 0.45;
           }
 
           if (p.progress >= 78 && p.progress < 90) {
-            speed += (Math.random() - 0.5) * 0.7;
+            speed += (Math.random() - 0.5) * 0.22;
           }
 
           const first = sortedByProgress[0];
@@ -713,9 +786,9 @@
           if (p.progress >= 90 && first && second) {
             const isTopTwo = p.id === first.id || p.id === second.id;
             if (isTopTwo) {
-              const swing = Math.sin(now / 120) * 1.1;
+              const swing = Math.sin(now / 180) * 0.32;
               speed += swing;
-              speed *= 0.72;
+              speed *= 0.58;
 
               if (!nearFinishTriggered) {
                 raceStatus.textContent = "결승선 앞 초접전!";
@@ -723,11 +796,11 @@
               }
               nearFinishTriggered = true;
             } else {
-              speed *= 0.62;
+              speed *= 0.52;
             }
           }
 
-          speed = Math.max(0.06, speed);
+          speed = Math.max(0.03, speed);
           p.progress += speed;
 
           if (p.progress >= 100) {
@@ -745,6 +818,8 @@
         });
 
         const liveSorted = [...currentRaceData].sort((a, b) => b.progress - a.progress);
+        renderLiveRank(liveSorted);
+
         if (liveSorted[0]) {
           const idx1 = currentRaceData.findIndex(x => x.id === liveSorted[0].id);
           document.getElementById(`track-${idx1}`)?.classList.add("first-place");
@@ -802,9 +877,14 @@
           </div>
         `).join("");
 
+        renderLiveRank(result);
         winnerLog.push(`${winner.emoji} ${winner.name}`);
         updateWinnerHistory();
         resultBox.classList.add("show");
+
+        setTimeout(() => {
+          resultBox.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
       }
 
       requestAnimationFrame(frame);
@@ -828,14 +908,13 @@
       renderParticipants();
     });
 
-    startBtn.addEventListener("click", startRace);
-    doubleBtn.addEventListener("click", startRace);
+    startBtn.addEventListener("click", () => startRace(false));
+    doubleBtn.addEventListener("click", () => startRace(true));
     backBtn.addEventListener("click", () => {
       if (raceRunning) return;
       showSetupScreen();
     });
 
-    // 초기 버튼 렌더
     renderAnimalButtons();
     renderParticipants();
   </script>
