@@ -207,6 +207,7 @@
 
       <div class="controls">
         <button id="spinBtn">돌리기</button>
+        <button onclick="forceJackpot()">잭팟 테스트</button>
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
@@ -245,6 +246,29 @@
   </div>
 
   <script>
+    function forceJackpot() {
+  const jackpotAnimal = animals[Math.floor(Math.random() * animals.length)];
+
+  // 화면 강제 세팅
+  reels.forEach(reel => {
+    reel.textContent = jackpotAnimal;
+  });
+
+  // 통계 처리
+  totalSpins++;
+  jackpotCount++;
+
+  for (let i = 0; i < 3; i++) {
+    animalCounts[jackpotAnimal]++;
+  }
+
+  // 결과 출력
+  resultText.textContent = `JACKPOT! ${jackpotAnimal} ${jackpotAnimal} ${jackpotAnimal}`;
+  resultText.classList.add("jackpot");
+  effectArea.textContent = "🎉✨🎊💥✨🎉";
+
+  updateStats();
+}
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
     const reels = [
       document.getElementById("reel1"),
