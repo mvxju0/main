@@ -68,6 +68,15 @@
       animation: shake 0.12s linear infinite;
     }
 
+    .reel.near-hit {
+      animation: nearHitPulse 0.45s ease-in-out 2;
+      border-color: #ffb703;
+      box-shadow:
+        0 0 10px rgba(255, 183, 3, 0.85),
+        0 0 22px rgba(255, 183, 3, 0.45),
+        inset 0 3px 10px rgba(0,0,0,0.08);
+    }
+
     .reel.jackpot-glow {
       animation: jackpotBorderFlash 0.35s ease-in-out 6;
       border-color: #ffcf33;
@@ -82,6 +91,12 @@
       0% { transform: translateY(-2px); }
       50% { transform: translateY(2px); }
       100% { transform: translateY(-2px); }
+    }
+
+    @keyframes nearHitPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
     @keyframes jackpotBorderFlash {
@@ -145,9 +160,20 @@
       animation: pop 0.5s ease infinite alternate;
     }
 
+    .near-hit-text {
+      color: #b35c00;
+      animation: nearTextBlink 0.45s ease-in-out 2;
+    }
+
     @keyframes pop {
       from { transform: scale(1); }
       to { transform: scale(1.06); }
+    }
+
+    @keyframes nearTextBlink {
+      0% { opacity: 0.65; }
+      50% { opacity: 1; }
+      100% { opacity: 0.75; }
     }
 
     .effect {
@@ -312,7 +338,7 @@
       </div>
 
       <div class="controls">
-        <button id="spinBtn">돌리기 (-10코인)</button>
+        <button id="spinBtn">돌리기 (-1코인)</button>
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
@@ -330,7 +356,7 @@
         <div class="summary-4">
           <div class="card">
             <strong>보유 코인</strong>
-            <span id="coinBalance">1000</span>
+            <span id="coinBalance">100</span>
           </div>
           <div class="card">
             <strong>사용한 코인</strong>
@@ -394,7 +420,7 @@
           </div>
           <div class="card">
             <strong>최고 잔고</strong>
-            <span id="bestCoinBalance">10000</span>
+            <span id="bestCoinBalance">100</span>
           </div>
         </div>
       </div>
@@ -410,9 +436,10 @@
 
   <script>
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
-    const spinCost = 10;
-    const jackpotReward = 100;
+    const spinCost = 1;
+    const jackpotReward = 50;
     const historyLimit = 10;
+    const secondMatchChance = 0.25;
 
     const reels = [
       document.getElementById("reel1"),
@@ -444,12 +471,12 @@
 
     let totalSpins = 0;
     let jackpotCount = 0;
-    let coinBalance = 1000;
+    let coinBalance = 100;
     let spentCoins = 0;
     let earnedCoins = 0;
     let currentFailStreak = 0;
     let maxFailStreak = 0;
-    let bestCoinBalance = 10000;
+    let bestCoinBalance = 100;
     const history = [];
 
     const animalCounts = {};
@@ -459,6 +486,13 @@
 
     function getRandomAnimal() {
       return animals[Math.floor(Math.random() * animals.length)];
+    }
+
+    function getFinalResults() {
+      const first = getRandomAnimal();
+      const second = Math.random() < secondMatchChance ? first : getRandomAnimal();
+      const third = getRandomAnimal();
+      return [first, second, third];
     }
 
     function getMostCommonAnimal() {
@@ -486,6 +520,21 @@
 
     function hideJackpotGif() {
       jackpotGif.style.display = "none";
+    }
+
+    function playNearHitEffects() {
+      reels[0].classList.remove("near-hit");
+      reels[1].classList.remove("near-hit");
+      void reels[0].offsetWidth;
+      reels[0].classList.add("near-hit");
+      reels[1].classList.add("near-hit");
+    }
+
+    function clearNearHitEffects() {
+      reels.forEach(reel => {
+        reel.classList.remove("near-hit");
+      });
+      resultText.classList.remove("near-hit-text");
     }
 
     function playJackpotEffects() {
@@ -586,44 +635,61 @@
       renderHistory();
     }
 
+    async function stopReelWithAnimation(reelIndex, finalAnimal, extraDelay = 0) {
+      await new Promise(resolve => {
+        let count = 0;
+        const interval = setInterval(() => {
+          reels[reelIndex].textContent = getRandomAnimal();
+          count++;
+
+          if (count > 12 + reelIndex * 6) {
+            clearInterval(interval);
+            setTimeout(() => {
+              reels[reelIndex].textContent = finalAnimal;
+              resolve();
+            }, extraDelay);
+          }
+        }, 80);
+      });
+    }
+
     async function spin() {
       if (coinBalance < spinCost) {
         resultText.textContent = `코인이 부족합니다. 현재 잔고: ${coinBalance}코인`;
         resultText.classList.remove("jackpot");
+        resultText.classList.remove("near-hit-text");
         hideJackpotGif();
         clearJackpotEffects();
+        clearNearHitEffects();
         return;
       }
 
       spinBtn.disabled = true;
       resultText.classList.remove("jackpot");
+      resultText.classList.remove("near-hit-text");
       hideJackpotGif();
       clearJackpotEffects();
+      clearNearHitEffects();
 
       coinBalance -= spinCost;
       spentCoins += spinCost;
 
       reels.forEach(reel => reel.classList.add("spinning"));
 
-      const finalResults = [];
+      const finalResults = getFinalResults();
 
-      for (let i = 0; i < reels.length; i++) {
-        await new Promise(resolve => {
-          let count = 0;
-          const interval = setInterval(() => {
-            reels[i].textContent = getRandomAnimal();
-            count++;
+      await stopReelWithAnimation(0, finalResults[0]);
+      await stopReelWithAnimation(1, finalResults[1]);
 
-            if (count > 12 + i * 6) {
-              clearInterval(interval);
-              const finalAnimal = getRandomAnimal();
-              reels[i].textContent = finalAnimal;
-              finalResults.push(finalAnimal);
-              resolve();
-            }
-          }, 80);
-        });
+      const isNearHit = finalResults[0] === finalResults[1];
+
+      if (isNearHit) {
+        playNearHitEffects();
+        resultText.textContent = "오? 두 개 맞았다…!";
+        resultText.classList.add("near-hit-text");
       }
+
+      await stopReelWithAnimation(2, finalResults[2], isNearHit ? 350 : 0);
 
       reels.forEach(reel => reel.classList.remove("spinning"));
 
@@ -643,6 +709,7 @@
         coinBalance += jackpotReward;
         earnedCoins += jackpotReward;
         resultText.textContent = `JACKPOT! ${finalResults[0]} ${finalResults[1]} ${finalResults[2]} (+${jackpotReward}코인)`;
+        resultText.classList.remove("near-hit-text");
         resultText.classList.add("jackpot");
         showJackpotGif();
         playJackpotEffects();
@@ -651,6 +718,8 @@
         if (currentFailStreak > maxFailStreak) {
           maxFailStreak = currentFailStreak;
         }
+        resultText.classList.remove("jackpot");
+        resultText.classList.remove("near-hit-text");
         resultText.textContent = `${finalResults.join(" ")} 아쉽지만 다음 기회 (-${spinCost}코인)`;
       }
 
