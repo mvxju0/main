@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>메인페이지</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #0f172a;
+      font-family: 'Pretendard', sans-serif;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    h1 {
+      color: white;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      display: block;
+      width: 220px;
+      padding: 15px;
+      margin: 10px auto;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background: #D8006C;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn:hover {
+      background: #a0004f;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>게임 선택</h1>
+
+    <button class="btn" onclick="location.href='race.html'">
+      애니멀런
+    </button>
+
+    <button class="btn" onclick="location.href='roulette.html'">
+      애니멀룰렛
+    </button>
+  </div>
+
+</body>
+</html>
