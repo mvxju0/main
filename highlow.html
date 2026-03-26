@@ -9,8 +9,7 @@
 body {
   margin:0;
   font-family:Arial;
-  background: linear-gradient(180deg,#fff9f2,#ffe8d9);
-  color:#333;
+  background:linear-gradient(180deg,#fff9f2,#ffe8d9);
 }
 
 .wrap {
@@ -24,178 +23,157 @@ body {
   border-radius:20px;
   padding:20px;
   box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  margin-bottom:15px;
-}
-
-h1 {
-  text-align:center;
-  margin-bottom:10px;
-}
-
-.guide {
-  background:#fff3ea;
-  padding:12px;
-  border-radius:12px;
-  font-size:14px;
-  color:#7a5b4a;
-  margin-bottom:15px;
 }
 
 .card {
-  font-size:70px;
+  font-size:80px;
   text-align:center;
   margin:20px 0;
+  transition:0.3s;
+}
+
+.glow {
+  text-shadow:0 0 15px gold;
 }
 
 .btn {
   width:100%;
-  padding:18px;
-  margin:8px 0;
+  padding:16px;
+  margin:6px 0;
   font-size:20px;
-  font-weight:bold;
   border:none;
-  border-radius:14px;
+  border-radius:12px;
   background:#ff7b54;
   color:white;
 }
 
-.btn:hover {
-  transform:scale(1.03);
-}
-
-.stop {
-  background:#999;
-}
-
 .result {
   text-align:center;
+  min-height:40px;
   font-size:20px;
-  min-height:30px;
   margin-top:10px;
 }
 
-.streak {
-  text-align:center;
-  font-weight:bold;
-  margin-top:10px;
-}
+.warning { color:#ff9800; }
+.danger { color:#ff4d4d; }
+.success { color:#00b894; }
 
-.stats {
-  font-size:14px;
-  margin-top:10px;
-  line-height:1.6;
-}
 </style>
 
 </head>
 <body>
 
 <div class="wrap">
-
 <div class="panel">
-<h1>하이앤로우</h1>
 
-<div class="guide">
-현재 카드보다 높은지 낮은지 맞추세요.<br>
-연승이 쌓일수록 보상이 커지지만 실패하면 전부 잃습니다.
-</div>
+<h2>하이앤로우</h2>
 
-<div id="coin">코인: 100</div>
-<div id="pool">보상: 0</div>
-<div id="multiplier">배당: x2</div>
+<div id="coin">코인:100</div>
+<div id="pool">보상:0</div>
+<div id="title"></div>
 
 <div class="card" id="card">?</div>
+
+<div id="hint"></div>
 
 <button class="btn" onclick="play('high')">HIGH</button>
 <button class="btn" onclick="play('low')">LOW</button>
 
-<button class="btn stop" onclick="stopGame()">STOP</button>
+<button class="btn" onclick="stopGame()">STOP</button>
 
 <div class="result" id="result"></div>
-<div class="streak" id="streak"></div>
 
 </div>
-
-<div class="panel stats" id="stats"></div>
-
 </div>
 
 <script>
 
-let coin=100;
-let pool=0;
-let streak=0;
+let coin=100,pool=0,streak=0;
 let current=draw();
 
-let games=0,wins=0;
-let maxCoin=100,minCoin=100;
-let maxProfit=0,maxLoss=0;
-
-update();
-
-function draw(){
-  return Math.floor(Math.random()*13)+1;
-}
+function draw(){ return Math.floor(Math.random()*13)+1; }
 
 function play(type){
 
-  let next=draw();
   let result=document.getElementById("result");
+  let cardEl=document.getElementById("card");
 
-  result.innerText="카드 공개 중...";
+  // 선택 반응
+  cardEl.style.transform="scale(1.2)";
 
   setTimeout(()=>{
+    cardEl.style.transform="scale(1)";
+  },150);
 
+  // 착각 문구
+  document.getElementById("hint").innerText=
+    Math.random()>0.5?"이번엔 HIGH 흐름인데…":"LOW 쪽이 유력하다…";
+
+  let next=draw();
+
+  result.innerText="뒤집는 중...";
+
+  // 긴장 멈춤
+  setTimeout(()=>{
+    
     let win=false;
 
     if(type==="high" && next>current) win=true;
     if(type==="low" && next<current) win=true;
 
-    // 연승 증가 시 실패확률 증가
-    if(streak>=5 && Math.random()<0.15){
-      win=false;
-    }
+    if(streak>=5 && Math.random()<0.15) win=false;
+
+    // 거의 맞을뻔
+    let near=Math.abs(next-current)===1;
 
     if(win){
-      wins++;
       streak++;
-
-      let multi=2+(streak*0.3);
-      let reward=Math.floor(20*multi);
-
+      let reward=Math.floor(20*(2+streak*0.3));
       pool+=reward;
 
       result.innerText="🔥 성공 +" + reward;
+      result.className="result success";
+
+      if(streak>=3){
+        cardEl.classList.add("glow");
+      }
 
     }else{
 
       let loss=pool;
       pool=0;
+
+      // 슬로우 파괴
+      if(streak>=4){
+        result.innerText="여기서… 끝난다";
+      }else{
+        result.innerText="💀 실패 -" + loss;
+      }
+
+      result.className="result danger";
+
       streak=0;
-
-      result.innerText="💀 실패 -" + loss;
-
-      if(loss>maxLoss) maxLoss=loss;
+      cardEl.classList.remove("glow");
     }
 
-    // 거의 맞을뻔 연출
-    if(Math.abs(next-current)===1){
+    if(near){
       result.innerText+=" (아깝다)";
     }
 
     current=next;
-    games++;
 
     update();
 
-  },600);
+  },700);
 }
 
 function stopGame(){
 
-  coin+=pool;
+  let gain=pool;
+  coin+=gain;
 
-  if(pool>maxProfit) maxProfit=pool;
+  // 코인 흡수 연출
+  document.getElementById("result").innerText="+"+gain+" 흡수";
 
   pool=0;
   streak=0;
@@ -206,33 +184,20 @@ function stopGame(){
 function update(){
 
   document.getElementById("card").innerText=current;
-  document.getElementById("coin").innerText="코인: "+coin;
-  document.getElementById("pool").innerText="보상: "+pool;
+  document.getElementById("coin").innerText="코인:"+coin;
+  document.getElementById("pool").innerText="보상:"+pool;
 
-  let multi=2+(streak*0.3);
-  document.getElementById("multiplier").innerText="배당: x"+multi.toFixed(1);
+  let title="";
 
-  let streakText="연승: "+streak;
+  if(streak>=7) title="🔥 멈출 수 없음";
+  else if(streak>=5) title="🔥 폭주 상태";
+  else if(streak>=3) title="흐름 탑승";
 
-  if(streak>=5) streakText+=" 🔥🔥";
-  else if(streak>=3) streakText+=" 🔥";
+  document.getElementById("title").innerText=title;
 
-  document.getElementById("streak").innerText=streakText;
-
-  if(coin>maxCoin) maxCoin=coin;
-  if(coin<minCoin) minCoin=coin;
-
-  let winRate=games?Math.floor(wins/games*100):0;
-
-  document.getElementById("stats").innerHTML=`
-  승률: ${winRate}%<br>
-  플레이: ${games}<br><br>
-  최고 잔고: ${maxCoin}<br>
-  최저 잔고: ${minCoin}<br><br>
-  최대 수익: +${maxProfit}<br>
-  최대 손실: -${maxLoss}
-  `;
 }
+
+update();
 
 </script>
 
