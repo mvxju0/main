@@ -1,205 +1,965 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>하이앤로우</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>하이앤로우</title>
+  <style>
+    * { box-sizing: border-box; }
 
-<style>
-body {
-  margin:0;
-  font-family:Arial;
-  background:linear-gradient(180deg,#fff9f2,#ffe8d9);
-}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(180deg, #fff9f2, #ffe8d9);
+      color: #222;
+      padding: 20px 14px 32px;
+    }
 
-.wrap {
-  max-width:520px;
-  margin:auto;
-  padding:20px;
-}
+    .wrap {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
 
-.panel {
-  background:white;
-  border-radius:20px;
-  padding:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-}
+    .panel {
+      background: rgba(255,255,255,0.94);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+      margin-bottom: 16px;
+    }
 
-.card {
-  font-size:80px;
-  text-align:center;
-  margin:20px 0;
-  transition:0.3s;
-}
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+      text-align: center;
+    }
 
-.glow {
-  text-shadow:0 0 15px gold;
-}
+    .sub {
+      margin: 0;
+      text-align: center;
+      color: #666;
+      font-size: 15px;
+    }
 
-.btn {
-  width:100%;
-  padding:16px;
-  margin:6px 0;
-  font-size:20px;
-  border:none;
-  border-radius:12px;
-  background:#ff7b54;
-  color:white;
-}
+    .guide-box {
+      margin-top: 16px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 14px;
+      padding: 12px 14px;
+      color: #7a5b4a;
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
-.result {
-  text-align:center;
-  min-height:40px;
-  font-size:20px;
-  margin-top:10px;
-}
+    .top-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
 
-.warning { color:#ff9800; }
-.danger { color:#ff4d4d; }
-.success { color:#00b894; }
+    .mini-card {
+      background: #fff8ef;
+      border: 1px solid #ffd9b8;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
 
-</style>
+    .mini-card strong {
+      display: block;
+      font-size: 13px;
+      color: #6f6159;
+      margin-bottom: 6px;
+    }
 
+    .mini-card span {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .coin-positive { color: #0f9f69; }
+    .coin-negative { color: #d64545; }
+    .coin-neutral { color: #333; }
+
+    .streak-area {
+      margin-top: 16px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      transition: 0.25s ease;
+    }
+
+    .streak-label {
+      color: #7b6253;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .streak-value {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .streak-title {
+      font-size: 15px;
+      font-weight: bold;
+      min-height: 22px;
+    }
+
+    .streak-area.level-0 .streak-value,
+    .streak-area.level-0 .streak-title { color: #444; }
+
+    .streak-area.level-1 {
+      box-shadow: 0 0 0 2px rgba(255, 183, 77, 0.08) inset;
+    }
+
+    .streak-area.level-1 .streak-value,
+    .streak-area.level-1 .streak-title { color: #c86f18; }
+
+    .streak-area.level-2 {
+      box-shadow: 0 0 0 2px rgba(255, 120, 80, 0.12) inset, 0 0 18px rgba(255, 160, 60, 0.12);
+    }
+
+    .streak-area.level-2 .streak-value,
+    .streak-area.level-2 .streak-title { color: #d14a2b; }
+
+    .streak-area.level-3 {
+      box-shadow: 0 0 0 2px rgba(216, 0, 108, 0.16) inset, 0 0 24px rgba(216, 0, 108, 0.18);
+      animation: pulseGlow 0.8s ease-in-out infinite alternate;
+    }
+
+    .streak-area.level-3 .streak-value,
+    .streak-area.level-3 .streak-title { color: #d8006c; }
+
+    @keyframes pulseGlow {
+      from { transform: scale(1); }
+      to { transform: scale(1.01); }
+    }
+
+    .warning-box {
+      margin-top: 12px;
+      min-height: 24px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #b96a00;
+    }
+
+    .card-stage {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-wrap {
+      perspective: 1000px;
+      width: 180px;
+      height: 250px;
+      position: relative;
+    }
+
+    .playing-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.65s ease;
+    }
+
+    .playing-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .playing-card.reveal-pause {
+      transition: transform 0.35s ease;
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      backface-visibility: hidden;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+      overflow: hidden;
+    }
+
+    .card-front {
+      background: linear-gradient(180deg, #fff, #fff8f3);
+      border: 2px solid #efd8c8;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+    }
+
+    .card-back {
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.18), transparent 25%),
+        linear-gradient(135deg, #d8006c, #8f0045);
+      border: 2px solid #b10058;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-back::before {
+      content: "♠ ♥ ♦ ♣";
+      color: rgba(255,255,255,0.9);
+      font-size: 22px;
+      letter-spacing: 10px;
+      text-shadow: 0 0 12px rgba(255,255,255,0.15);
+    }
+
+    .card-top, .card-bottom {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+      font-weight: bold;
+      font-size: 24px;
+    }
+
+    .card-bottom {
+      align-self: flex-end;
+      transform: rotate(180deg);
+    }
+
+    .card-suit {
+      font-size: 22px;
+      margin-top: 4px;
+    }
+
+    .card-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 68px;
+      font-weight: bold;
+      flex: 1;
+    }
+
+    .card-red {
+      color: #d64545;
+    }
+
+    .card-black {
+      color: #222;
+    }
+
+    .card-glow-win .card-front {
+      box-shadow: 0 0 0 2px rgba(255, 196, 0, 0.3), 0 0 24px rgba(255, 196, 0, 0.3);
+    }
+
+    .card-glow-danger .card-front {
+      box-shadow: 0 0 0 2px rgba(214, 69, 69, 0.25), 0 0 24px rgba(214, 69, 69, 0.22);
+    }
+
+    .shake {
+      animation: shake 0.38s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+      100% { transform: translateX(0); }
+    }
+
+    .choice-hint {
+      min-height: 24px;
+      text-align: center;
+      font-size: 14px;
+      color: #7a5b4a;
+      font-weight: bold;
+    }
+
+    .bet-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .bet-btn {
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid #ffd9c2;
+      background: #fff6f0;
+      color: #a24f2f;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .bet-btn.active {
+      background: linear-gradient(135deg, #ffb18a, #ff7b54);
+      color: white;
+      border-color: #ff7b54;
+      box-shadow: 0 8px 18px rgba(255,123,84,0.22);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .btn {
+      height: 58px;
+      border: 0;
+      border-radius: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    .btn-high,
+    .btn-low {
+      background: linear-gradient(135deg, #ff7b54, #d8006c);
+      color: white;
+      box-shadow: 0 10px 20px rgba(216,0,108,0.18);
+    }
+
+    .btn-stop {
+      width: 100%;
+      margin-top: 10px;
+      background: #5a6070;
+      color: white;
+      height: 54px;
+      border: 0;
+      border-radius: 16px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn:disabled,
+    .btn-stop:disabled,
+    .bet-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .result-box {
+      margin-top: 16px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .result-main {
+      min-height: 30px;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .result-sub {
+      min-height: 24px;
+      font-size: 14px;
+      color: #7a5b4a;
+      font-weight: bold;
+    }
+
+    .big-win {
+      color: #c88700;
+      text-shadow: 0 0 12px rgba(255, 196, 0, 0.25);
+    }
+
+    .fail-text {
+      color: #d64545;
+    }
+
+    .coin-float {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 120px;
+      font-size: 28px;
+      font-weight: bold;
+      z-index: 1000;
+      pointer-events: none;
+      animation: floatUp 1s ease forwards;
+    }
+
+    .coin-float.plus {
+      color: #0f9f69;
+    }
+
+    .coin-float.minus {
+      color: #d64545;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translate(-50%, 16px) scale(0.9); }
+      15% { opacity: 1; }
+      100% { opacity: 0; transform: translate(-50%, -48px) scale(1.08); }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-card {
+      background: #fff8ef;
+      border: 1px solid #ffd9b8;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 13px;
+      color: #6f6159;
+      margin-bottom: 6px;
+    }
+
+    .stat-card span {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 560px) {
+      .top-stats,
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .card-wrap {
+        width: 150px;
+        height: 210px;
+      }
+
+      .card-center {
+        font-size: 58px;
+      }
+
+      .btn {
+        font-size: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>하이앤로우</h1>
+      <p class="sub">흐름을 읽고, 보상을 쌓고, 깨지기 전에 멈춰라.</p>
 
-<div class="wrap">
-<div class="panel">
+      <div class="guide-box">
+        현재 카드보다 다음 카드가 높을지 낮을지 선택하세요.<br>
+        성공하면 보상 풀이 커지고, 실패하면 쌓인 보상은 전부 사라집니다.<br>
+        코인은 0 아래로도 내려갈 수 있습니다.
+      </div>
 
-<h2>하이앤로우</h2>
+      <div class="top-stats">
+        <div class="mini-card">
+          <strong>현재 잔고</strong>
+          <span id="coinValue" class="coin-neutral">100</span>
+        </div>
+        <div class="mini-card">
+          <strong>보상 풀</strong>
+          <span id="poolValue" class="coin-neutral">0</span>
+        </div>
+      </div>
 
-<div id="coin">코인:100</div>
-<div id="pool">보상:0</div>
-<div id="title"></div>
+      <div class="streak-area level-0" id="streakArea">
+        <div class="streak-label">현재 연승</div>
+        <div class="streak-value" id="streakValue">0</div>
+        <div class="streak-title" id="streakTitle">준비 완료</div>
+      </div>
 
-<div class="card" id="card">?</div>
+      <div class="warning-box" id="warningBox"></div>
 
-<div id="hint"></div>
+      <div class="card-stage">
+        <div class="card-wrap" id="cardWrap">
+          <div class="playing-card" id="playingCard">
+            <div class="card-face card-back"></div>
+            <div class="card-face card-front" id="cardFront">
+              <div class="card-top" id="cardTop"></div>
+              <div class="card-center" id="cardCenter"></div>
+              <div class="card-bottom" id="cardBottom"></div>
+            </div>
+          </div>
+        </div>
 
-<button class="btn" onclick="play('high')">HIGH</button>
-<button class="btn" onclick="play('low')">LOW</button>
+        <div class="choice-hint" id="choiceHint"></div>
+      </div>
 
-<button class="btn" onclick="stopGame()">STOP</button>
+      <div class="bet-row">
+        <button class="bet-btn active" data-bet="10">10</button>
+        <button class="bet-btn" data-bet="20">20</button>
+        <button class="bet-btn" data-bet="30">30</button>
+      </div>
 
-<div class="result" id="result"></div>
+      <div class="action-row">
+        <button class="btn btn-high" id="highBtn">HIGH</button>
+        <button class="btn btn-low" id="lowBtn">LOW</button>
+      </div>
 
-</div>
-</div>
+      <button class="btn-stop" id="stopBtn">STOP</button>
 
-<script>
+      <div class="result-box">
+        <div class="result-main" id="resultMain"></div>
+        <div class="result-sub" id="resultSub"></div>
+      </div>
+    </div>
 
-let coin=100,pool=0,streak=0;
-let current=draw();
+    <div class="panel">
+      <h2 style="margin:0 0 10px; font-size:22px;">통계창</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <strong>승률</strong>
+          <span id="statWinRate">0%</span>
+        </div>
+        <div class="stat-card">
+          <strong>플레이 수</strong>
+          <span id="statGames">0</span>
+        </div>
+        <div class="stat-card">
+          <strong>최고 연승</strong>
+          <span id="statBestStreak">0</span>
+        </div>
+        <div class="stat-card">
+          <strong>최고 배당</strong>
+          <span id="statBestMulti">x2.0</span>
+        </div>
+        <div class="stat-card">
+          <strong>최고 잔고</strong>
+          <span id="statMaxCoin">100</span>
+        </div>
+        <div class="stat-card">
+          <strong>최저 잔고</strong>
+          <span id="statMinCoin">100</span>
+        </div>
+        <div class="stat-card">
+          <strong>최대 수익</strong>
+          <span id="statMaxProfit">0</span>
+        </div>
+        <div class="stat-card">
+          <strong>최대 손실</strong>
+          <span id="statMaxLoss">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-function draw(){ return Math.floor(Math.random()*13)+1; }
+  <script>
+    const suits = [
+      { symbol: "♠", color: "black" },
+      { symbol: "♣", color: "black" },
+      { symbol: "♥", color: "red" },
+      { symbol: "♦", color: "red" }
+    ];
 
-function play(type){
+    let coin = 100;
+    let pool = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let bestMultiplier = 2.0;
+    let games = 0;
+    let wins = 0;
+    let maxCoin = 100;
+    let minCoin = 100;
+    let maxProfit = 0;
+    let maxLoss = 0;
+    let currentBet = 10;
+    let isBusy = false;
 
-  let result=document.getElementById("result");
-  let cardEl=document.getElementById("card");
+    const playingCard = document.getElementById("playingCard");
+    const cardFront = document.getElementById("cardFront");
+    const cardTop = document.getElementById("cardTop");
+    const cardCenter = document.getElementById("cardCenter");
+    const cardBottom = document.getElementById("cardBottom");
+    const cardWrap = document.getElementById("cardWrap");
 
-  // 선택 반응
-  cardEl.style.transform="scale(1.2)";
+    const coinValue = document.getElementById("coinValue");
+    const poolValue = document.getElementById("poolValue");
+    const streakValue = document.getElementById("streakValue");
+    const streakTitle = document.getElementById("streakTitle");
+    const streakArea = document.getElementById("streakArea");
+    const warningBox = document.getElementById("warningBox");
+    const choiceHint = document.getElementById("choiceHint");
 
-  setTimeout(()=>{
-    cardEl.style.transform="scale(1)";
-  },150);
+    const highBtn = document.getElementById("highBtn");
+    const lowBtn = document.getElementById("lowBtn");
+    const stopBtn = document.getElementById("stopBtn");
 
-  // 착각 문구
-  document.getElementById("hint").innerText=
-    Math.random()>0.5?"이번엔 HIGH 흐름인데…":"LOW 쪽이 유력하다…";
+    const resultMain = document.getElementById("resultMain");
+    const resultSub = document.getElementById("resultSub");
 
-  let next=draw();
+    const statWinRate = document.getElementById("statWinRate");
+    const statGames = document.getElementById("statGames");
+    const statBestStreak = document.getElementById("statBestStreak");
+    const statBestMulti = document.getElementById("statBestMulti");
+    const statMaxCoin = document.getElementById("statMaxCoin");
+    const statMinCoin = document.getElementById("statMinCoin");
+    const statMaxProfit = document.getElementById("statMaxProfit");
+    const statMaxLoss = document.getElementById("statMaxLoss");
 
-  result.innerText="뒤집는 중...";
-
-  // 긴장 멈춤
-  setTimeout(()=>{
-    
-    let win=false;
-
-    if(type==="high" && next>current) win=true;
-    if(type==="low" && next<current) win=true;
-
-    if(streak>=5 && Math.random()<0.15) win=false;
-
-    // 거의 맞을뻔
-    let near=Math.abs(next-current)===1;
-
-    if(win){
-      streak++;
-      let reward=Math.floor(20*(2+streak*0.3));
-      pool+=reward;
-
-      result.innerText="🔥 성공 +" + reward;
-      result.className="result success";
-
-      if(streak>=3){
-        cardEl.classList.add("glow");
-      }
-
-    }else{
-
-      let loss=pool;
-      pool=0;
-
-      // 슬로우 파괴
-      if(streak>=4){
-        result.innerText="여기서… 끝난다";
-      }else{
-        result.innerText="💀 실패 -" + loss;
-      }
-
-      result.className="result danger";
-
-      streak=0;
-      cardEl.classList.remove("glow");
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    if(near){
-      result.innerText+=" (아깝다)";
+    function drawCard() {
+      const value = randomInt(1, 13);
+      const suit = suits[randomInt(0, suits.length - 1)];
+      return { value, suit: suit.symbol, color: suit.color };
     }
 
-    current=next;
+    function formatValue(value) {
+      if (value === 1) return "A";
+      if (value === 11) return "J";
+      if (value === 12) return "Q";
+      if (value === 13) return "K";
+      return String(value);
+    }
 
-    update();
+    function getNumericValue(card) {
+      return card.value;
+    }
 
-  },700);
-}
+    function renderCard(card) {
+      const text = formatValue(card.value);
+      const colorClass = card.color === "red" ? "card-red" : "card-black";
 
-function stopGame(){
+      cardTop.className = `card-top ${colorClass}`;
+      cardCenter.className = `card-center ${colorClass}`;
+      cardBottom.className = `card-bottom ${colorClass}`;
 
-  let gain=pool;
-  coin+=gain;
+      cardTop.innerHTML = `${text}<span class="card-suit">${card.suit}</span>`;
+      cardCenter.innerHTML = `${card.suit}`;
+      cardBottom.innerHTML = `${text}<span class="card-suit">${card.suit}</span>`;
+    }
 
-  // 코인 흡수 연출
-  document.getElementById("result").innerText="+"+gain+" 흡수";
+    function getMultiplierByStreak(nextStreak) {
+      if (nextStreak <= 1) return 2.0;
+      if (nextStreak === 2) return 2.2;
+      if (nextStreak === 3) return 2.5;
+      if (nextStreak === 4) return 3.0;
+      return 3.5;
+    }
 
-  pool=0;
-  streak=0;
+    function getStreakTier(value) {
+      if (value >= 7) return 3;
+      if (value >= 5) return 2;
+      if (value >= 3) return 1;
+      return 0;
+    }
 
-  update();
-}
+    function getStreakTitle(value) {
+      if (value >= 7) return "멈출 수 없음";
+      if (value >= 5) return "폭주 상태";
+      if (value >= 3) return "흐름 탑승";
+      if (value >= 1) return "시동 걸림";
+      return "준비 완료";
+    }
 
-function update(){
+    function updateDangerWarning(card) {
+      const v = getNumericValue(card);
 
-  document.getElementById("card").innerText=current;
-  document.getElementById("coin").innerText="코인:"+coin;
-  document.getElementById("pool").innerText="보상:"+pool;
+      if (streak >= 5) {
+        warningBox.textContent = "⚠ 연승이 높아졌습니다. 지금 깨지면 보상 풀 전부 손실";
+        return;
+      }
 
-  let title="";
+      if (v >= 6 && v <= 8) {
+        warningBox.textContent = "⚠ 위험 구간입니다. 선택이 애매합니다.";
+        return;
+      }
 
-  if(streak>=7) title="🔥 멈출 수 없음";
-  else if(streak>=5) title="🔥 폭주 상태";
-  else if(streak>=3) title="흐름 탑승";
+      if (v <= 3) {
+        warningBox.textContent = "HIGH 쪽 유혹이 강한 숫자입니다.";
+        return;
+      }
 
-  document.getElementById("title").innerText=title;
+      if (v >= 11) {
+        warningBox.textContent = "LOW 쪽 유혹이 강한 숫자입니다.";
+        return;
+      }
 
-}
+      warningBox.textContent = "";
+    }
 
-update();
+    function updateChoiceHint() {
+      const hints = [
+        "이번엔 HIGH 흐름인데…",
+        "LOW 쪽이 유력해 보이는데…",
+        "확률상 패턴이 바뀔 타이밍 같다",
+        "한 번 더 가면 먹힐 것 같은데…",
+        "이번 선택이 분기점일 수 있다"
+      ];
+      choiceHint.textContent = hints[randomInt(0, hints.length - 1)];
+    }
 
-</script>
+    function setBusy(state) {
+      isBusy = state;
+      highBtn.disabled = state;
+      lowBtn.disabled = state;
+      stopBtn.disabled = state;
+      document.querySelectorAll(".bet-btn").forEach(btn => {
+        btn.disabled = state;
+      });
+    }
 
+    function updateTopUI() {
+      coinValue.textContent = coin;
+      poolValue.textContent = pool;
+      streakValue.textContent = streak;
+      streakTitle.textContent = getStreakTitle(streak);
+
+      coinValue.className = coin > 0 ? "coin-positive" : coin < 0 ? "coin-negative" : "coin-neutral";
+      poolValue.className = pool > 0 ? "coin-positive" : pool < 0 ? "coin-negative" : "coin-neutral";
+
+      const tier = getStreakTier(streak);
+      streakArea.className = `streak-area level-${tier}`;
+
+      updateDangerWarning(currentCard);
+    }
+
+    function updateStats() {
+      const winRate = games ? Math.floor((wins / games) * 100) : 0;
+
+      statWinRate.textContent = `${winRate}%`;
+      statGames.textContent = games;
+      statBestStreak.textContent = bestStreak;
+      statBestMulti.textContent = `x${bestMultiplier.toFixed(1)}`;
+      statMaxCoin.textContent = maxCoin;
+      statMinCoin.textContent = minCoin;
+      statMaxProfit.textContent = `+${maxProfit}`;
+      statMaxLoss.textContent = `-${maxLoss}`;
+    }
+
+    function updateAll() {
+      updateTopUI();
+      updateStats();
+    }
+
+    function showCoinFloat(text, type = "plus") {
+      const el = document.createElement("div");
+      el.className = `coin-float ${type}`;
+      el.textContent = text;
+      document.body.appendChild(el);
+
+      setTimeout(() => {
+        el.remove();
+      }, 1000);
+    }
+
+    function revealCard(nextCard, pauseMs = 320) {
+      return new Promise(resolve => {
+        playingCard.classList.remove("flipped");
+        setTimeout(() => {
+          renderCard(nextCard);
+          playingCard.classList.add("reveal-pause");
+          playingCard.classList.add("flipped");
+
+          setTimeout(() => {
+            setTimeout(() => {
+              playingCard.classList.remove("reveal-pause");
+              resolve();
+            }, pauseMs);
+          }, 360);
+        }, 120);
+      });
+    }
+
+    function pulseSelection(btn) {
+      btn.style.transform = "scale(1.06)";
+      setTimeout(() => {
+        btn.style.transform = "";
+      }, 140);
+    }
+
+    function getResultDelay() {
+      return streak >= 4 ? 920 : 720;
+    }
+
+    function applySuccessVisual() {
+      cardWrap.classList.remove("shake");
+      cardFront.classList.remove("card-glow-danger");
+      cardFront.classList.add("card-glow-win");
+      setTimeout(() => {
+        cardFront.classList.remove("card-glow-win");
+      }, 700);
+    }
+
+    function applyFailVisual() {
+      cardFront.classList.remove("card-glow-win");
+      cardFront.classList.add("card-glow-danger");
+      cardWrap.classList.add("shake");
+
+      setTimeout(() => {
+        cardFront.classList.remove("card-glow-danger");
+        cardWrap.classList.remove("shake");
+      }, 700);
+    }
+
+    function classifyNearMiss(prev, next, choice, win) {
+      const diff = Math.abs(getNumericValue(next) - getNumericValue(prev));
+      if (win) return "";
+      if (diff === 1) return "아깝다… 한 끗 차이";
+      return "";
+    }
+
+    let currentCard = drawCard();
+    renderCard(currentCard);
+    playingCard.classList.add("flipped");
+    updateChoiceHint();
+    updateAll();
+
+    document.querySelectorAll(".bet-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (isBusy) return;
+        document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentBet = Number(btn.dataset.bet);
+      });
+    });
+
+    async function play(choice) {
+      if (isBusy) return;
+      setBusy(true);
+
+      if (choice === "high") pulseSelection(highBtn);
+      if (choice === "low") pulseSelection(lowBtn);
+
+      resultMain.textContent = "카드를 뒤집는 중…";
+      resultMain.className = "result-main";
+      resultSub.textContent = "";
+
+      updateChoiceHint();
+
+      const nextCard = drawCard();
+      const prevCard = currentCard;
+
+      await new Promise(r => setTimeout(r, 180));
+      await revealCard(nextCard, getResultDelay());
+
+      let win = false;
+      if (choice === "high" && getNumericValue(nextCard) > getNumericValue(prevCard)) win = true;
+      if (choice === "low" && getNumericValue(nextCard) < getNumericValue(prevCard)) win = true;
+
+      // 연승이 높아질수록 성공확률 소폭 하락
+      if (streak >= 5 && Math.random() < 0.15) {
+        win = false;
+      }
+
+      const nearMissText = classifyNearMiss(prevCard, nextCard, choice, win);
+
+      if (win) {
+        wins++;
+        streak++;
+        bestStreak = Math.max(bestStreak, streak);
+
+        const multiplier = getMultiplierByStreak(streak);
+        bestMultiplier = Math.max(bestMultiplier, multiplier);
+
+        const reward = Math.floor(currentBet * multiplier);
+        pool += reward;
+
+        resultMain.textContent = `성공 🔥 +${reward}`;
+        resultMain.className = "result-main big-win";
+
+        if (streak >= 5) {
+          resultSub.textContent = `BIG WIN · 현재 배당 x${multiplier.toFixed(1)}`;
+        } else if (streak >= 3) {
+          resultSub.textContent = `연승 배당 발동 · x${multiplier.toFixed(1)}`;
+        } else {
+          resultSub.textContent = `현재 배당 x${multiplier.toFixed(1)}`;
+        }
+
+        applySuccessVisual();
+        showCoinFloat(`+${reward}`, "plus");
+      } else {
+        const loss = pool;
+        const hadBigStreak = streak >= 4;
+
+        pool = 0;
+        streak = 0;
+
+        resultMain.textContent = hadBigStreak ? "여기서… 끝난다" : `실패 💀 -${loss}`;
+        resultMain.className = "result-main fail-text";
+
+        if (hadBigStreak) {
+          resultSub.textContent = `연승 종료 · 보상 풀 ${loss} 전부 손실`;
+        } else if (loss > 0) {
+          resultSub.textContent = `보상 풀 ${loss} 손실`;
+        } else {
+          resultSub.textContent = "이번 판은 수익 없이 종료";
+        }
+
+        if (nearMissText) {
+          resultSub.textContent += ` · ${nearMissText}`;
+        }
+
+        if (loss > maxLoss) maxLoss = loss;
+        applyFailVisual();
+        if (loss > 0) showCoinFloat(`-${loss}`, "minus");
+      }
+
+      currentCard = nextCard;
+
+      maxCoin = Math.max(maxCoin, coin + pool);
+      minCoin = Math.min(minCoin, coin);
+      games++;
+
+      updateAll();
+
+      // 결과 여운
+      await new Promise(r => setTimeout(r, streak >= 4 ? 1100 : 850));
+      setBusy(false);
+    }
+
+    function stopGame() {
+      if (isBusy) return;
+
+      const gain = pool;
+      coin += gain;
+
+      if (gain > maxProfit) maxProfit = gain;
+      if (coin > maxCoin) maxCoin = coin;
+      if (coin < minCoin) minCoin = coin;
+
+      resultMain.textContent = gain > 0 ? `STOP +${gain}` : "STOP";
+      resultMain.className = "result-main";
+      resultSub.textContent = gain > 0 ? "보상이 잔고로 흡수됩니다" : "확정할 보상이 없습니다";
+
+      if (gain !== 0) showCoinFloat(`+${gain}`, "plus");
+
+      pool = 0;
+      streak = 0;
+
+      updateAll();
+    }
+
+    highBtn.addEventListener("click", () => play("high"));
+    lowBtn.addEventListener("click", () => play("low"));
+    stopBtn.addEventListener("click", stopGame);
+  </script>
 </body>
 </html>
