@@ -35,6 +35,7 @@
         0 16px 40px rgba(0, 0, 0, 0.35),
         inset 0 0 0 1px rgba(255, 255, 255, 0.04);
       backdrop-filter: blur(6px);
+      position: relative;
     }
 
     .hero-gif {
@@ -47,6 +48,9 @@
         0 10px 28px rgba(0, 0, 0, 0.32),
         0 0 18px rgba(255, 214, 102, 0.18);
       border: 1px solid rgba(255, 215, 120, 0.18);
+      user-select: none;
+      -webkit-user-drag: none;
+      cursor: pointer;
     }
 
     .sub-copy {
@@ -72,7 +76,45 @@
       color: #d6ccda;
       font-size: 15px;
       line-height: 1.6;
-      margin: 0 0 24px;
+      margin: 0 0 18px;
+    }
+
+    .coin-box {
+      width: 100%;
+      margin: 0 auto 22px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 248, 239, 0.08);
+      border: 1px solid rgba(255, 215, 120, 0.16);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.06),
+        0 8px 20px rgba(0,0,0,0.16);
+    }
+
+    .coin-label {
+      color: rgba(255, 246, 224, 0.72);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .coin-value {
+      color: #ffd666;
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow:
+        0 0 10px rgba(255, 214, 102, 0.18),
+        0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .coin-help {
+      color: rgba(255, 246, 224, 0.72);
+      font-size: 12px;
+      margin-top: 8px;
+      line-height: 1.5;
     }
 
     .btn-group {
@@ -118,6 +160,89 @@
       letter-spacing: 0.04em;
     }
 
+    .admin-panel {
+      display: none;
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 248, 239, 0.08);
+      border: 1px solid rgba(255, 215, 120, 0.16);
+      text-align: left;
+    }
+
+    .admin-panel.show {
+      display: block;
+    }
+
+    .admin-title {
+      color: #fff3d7;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .admin-input {
+      width: 100%;
+      height: 48px;
+      margin-bottom: 10px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 214, 102, 0.22);
+      background: rgba(255,255,255,0.08);
+      color: #fff7e6;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .admin-input::placeholder {
+      color: rgba(255, 247, 230, 0.55);
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .admin-btn {
+      flex: 1;
+      min-width: 120px;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .admin-btn.add {
+      background: linear-gradient(135deg, #ffb25b, #ff7b54);
+      color: #fff;
+    }
+
+    .admin-btn.close {
+      background: rgba(255,255,255,0.12);
+      color: #fff7e6;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .admin-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255, 246, 224, 0.68);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .tap-status {
+      min-height: 18px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(255, 214, 102, 0.75);
+      text-align: center;
+    }
+
     @media (max-width: 640px) {
       body {
         padding: 16px 12px;
@@ -146,7 +271,11 @@
 
       .desc {
         font-size: 14px;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+      }
+
+      .coin-value {
+        font-size: 28px;
       }
 
       .btn {
@@ -165,6 +294,7 @@
 
   <div class="container">
     <img
+      id="heroGif"
       class="hero-gif"
       src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOGY1ZzFyNG13NG11MTdpbDM4MHZ5aDdmaGh5eWk0ZXRyZzhmdG8zaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PhdC5X5qr6mzK/giphy.gif"
       alt="카지노 분위기 GIF"
@@ -177,7 +307,13 @@
       원하는 게임을 골라 바로 입장하세요.
     </p>
 
-    <div class="btn-group">
+    <div class="coin-box">
+      <div class="coin-label">CURRENT GAME MONEY</div>
+      <div class="coin-value" id="coinDisplay">100</div>
+      <div class="coin-help">모든 게임에서 공용으로 사용하는 게임머니입니다.</div>
+    </div>
+
+    <div class="btn-group" id="btnGroup">
       <button class="btn" onclick="location.href='race.html'">
         애니멀런
         <span>막판 추월과 반전이 터지는 관람형 레이스</span>
@@ -187,8 +323,175 @@
         애니멀룰렛
         <span>한 번 더 누르게 되는 슬롯형 미니게임</span>
       </button>
+
+      <button class="btn" onclick="location.href='highlow.html'">
+        하이앤로우
+        <span>멈출지 더 갈지 고민하게 되는 카드 게임</span>
+      </button>
+    </div>
+
+    <div class="tap-status" id="tapStatus"></div>
+
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-title">관리자 모드</div>
+      <input
+        type="text"
+        id="btnNameInput"
+        class="admin-input"
+        placeholder="버튼 이름 예: highlow"
+      >
+      <input
+        type="text"
+        id="btnPageInput"
+        class="admin-input"
+        placeholder="이동 페이지 예: highlow.html"
+      >
+      <div class="admin-actions">
+        <button class="admin-btn add" id="addBtn">버튼 추가</button>
+        <button class="admin-btn close" id="closeAdminBtn">닫기</button>
+      </div>
+      <div class="admin-hint">
+        예시) 이름: highlow / 페이지: highlow.html
+      </div>
     </div>
   </div>
+
+  <script>
+    const STORAGE_KEY = "joojino_custom_buttons_v1";
+    const COIN_KEY = "coin";
+
+    const heroGif = document.getElementById("heroGif");
+    const tapStatus = document.getElementById("tapStatus");
+    const adminPanel = document.getElementById("adminPanel");
+    const btnGroup = document.getElementById("btnGroup");
+    const btnNameInput = document.getElementById("btnNameInput");
+    const btnPageInput = document.getElementById("btnPageInput");
+    const addBtn = document.getElementById("addBtn");
+    const closeAdminBtn = document.getElementById("closeAdminBtn");
+    const coinDisplay = document.getElementById("coinDisplay");
+
+    let tapCount = 0;
+    let tapTimer = null;
+
+    function initCoin() {
+      let coin = Number(localStorage.getItem(COIN_KEY));
+      if (Number.isNaN(coin)) {
+        coin = 100;
+        localStorage.setItem(COIN_KEY, coin);
+      }
+      coinDisplay.textContent = coin;
+      coinDisplay.classList.remove("coin-positive", "coin-negative", "coin-neutral");
+      coinDisplay.classList.add(
+        coin > 0 ? "coin-positive" : coin < 0 ? "coin-negative" : "coin-neutral"
+      );
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function loadCustomButtons() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveCustomButtons(buttons) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(buttons));
+    }
+
+    function createGameButton(name, page) {
+      const button = document.createElement("button");
+      button.className = "btn";
+      button.onclick = () => {
+        location.href = page;
+      };
+
+      button.innerHTML = `
+        ${escapeHtml(name)}
+        <span>${escapeHtml(page)} 로 이동</span>
+      `;
+
+      btnGroup.appendChild(button);
+    }
+
+    function renderCustomButtons() {
+      const customButtons = loadCustomButtons();
+      customButtons.forEach(item => {
+        if (item && item.name && item.page) {
+          createGameButton(item.name, item.page);
+        }
+      });
+    }
+
+    function openAdminPanel() {
+      adminPanel.classList.add("show");
+      tapStatus.textContent = "관리자 모드가 열렸습니다.";
+    }
+
+    function closeAdminPanel() {
+      adminPanel.classList.remove("show");
+      tapStatus.textContent = "";
+      btnNameInput.value = "";
+      btnPageInput.value = "";
+    }
+
+    function handleGifTap() {
+      tapCount += 1;
+
+      if (tapCount < 5) {
+        tapStatus.textContent = `관리자 모드까지 ${5 - tapCount}번 더 터치`;
+      }
+
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => {
+        tapCount = 0;
+        if (!adminPanel.classList.contains("show")) {
+          tapStatus.textContent = "";
+        }
+      }, 1600);
+
+      if (tapCount >= 5) {
+        tapCount = 0;
+        clearTimeout(tapTimer);
+        openAdminPanel();
+      }
+    }
+
+    function addCustomButton() {
+      const name = btnNameInput.value.trim();
+      const page = btnPageInput.value.trim();
+
+      if (!name || !page) {
+        tapStatus.textContent = "버튼 이름과 이동 페이지를 모두 입력하세요.";
+        return;
+      }
+
+      const buttons = loadCustomButtons();
+      buttons.push({ name, page });
+      saveCustomButtons(buttons);
+
+      createGameButton(name, page);
+
+      btnNameInput.value = "";
+      btnPageInput.value = "";
+      tapStatus.textContent = `버튼 "${name}" 이(가) 추가되었습니다.`;
+    }
+
+    heroGif.addEventListener("click", handleGifTap);
+    heroGif.addEventListener("touchstart", handleGifTap, { passive: true });
+
+    addBtn.addEventListener("click", addCustomButton);
+    closeAdminBtn.addEventListener("click", closeAdminPanel);
+
+    initCoin();
+    renderCustomButtons();
+  </script>
 
 </body>
 </html>
