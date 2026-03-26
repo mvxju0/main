@@ -247,13 +247,8 @@
       flex: 1;
     }
 
-    .card-red {
-      color: #d64545;
-    }
-
-    .card-black {
-      color: #222;
-    }
+    .card-red { color: #d64545; }
+    .card-black { color: #222; }
 
     .card-glow-win .card-front {
       box-shadow: 0 0 0 2px rgba(255, 196, 0, 0.3), 0 0 24px rgba(255, 196, 0, 0.3);
@@ -284,29 +279,47 @@
       font-weight: bold;
     }
 
-    .bet-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 18px;
+    .reward-banner {
+      margin-top: 14px;
+      width: 100%;
+      background: linear-gradient(135deg, #fff8ef, #fff2e7);
+      border: 1px solid #ffd9b8;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      transition: 0.25s ease;
     }
 
-    .bet-btn {
-      height: 52px;
-      border-radius: 14px;
-      border: 1px solid #ffd9c2;
-      background: #fff6f0;
-      color: #a24f2f;
+    .reward-banner.hot {
+      box-shadow:
+        0 0 0 2px rgba(255, 173, 66, 0.16) inset,
+        0 0 18px rgba(255, 146, 43, 0.16);
+      animation: rewardPulse 0.8s ease-in-out infinite alternate;
+    }
+
+    .reward-banner.max {
+      box-shadow:
+        0 0 0 2px rgba(216, 0, 108, 0.18) inset,
+        0 0 24px rgba(216, 0, 108, 0.18);
+    }
+
+    @keyframes rewardPulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.01); }
+    }
+
+    .reward-main {
+      font-size: 30px;
+      font-weight: 900;
+      color: #c88700;
+      margin-bottom: 4px;
+    }
+
+    .reward-sub {
+      font-size: 14px;
+      color: #7a5b4a;
       font-weight: bold;
-      font-size: 18px;
-      cursor: pointer;
-    }
-
-    .bet-btn.active {
-      background: linear-gradient(135deg, #ffb18a, #ff7b54);
-      color: white;
-      border-color: #ff7b54;
-      box-shadow: 0 8px 18px rgba(255,123,84,0.22);
     }
 
     .action-row {
@@ -352,8 +365,7 @@
     }
 
     .btn:disabled,
-    .btn-stop:disabled,
-    .bet-btn:disabled {
+    .btn-stop:disabled {
       opacity: 0.55;
       cursor: not-allowed;
     }
@@ -402,13 +414,8 @@
       animation: floatUp 1s ease forwards;
     }
 
-    .coin-float.plus {
-      color: #0f9f69;
-    }
-
-    .coin-float.minus {
-      color: #d64545;
-    }
+    .coin-float.plus { color: #0f9f69; }
+    .coin-float.minus { color: #d64545; }
 
     @keyframes floatUp {
       0% { opacity: 0; transform: translate(-50%, 16px) scale(0.9); }
@@ -461,6 +468,10 @@
       .btn {
         font-size: 20px;
       }
+
+      .reward-main {
+        font-size: 26px;
+      }
     }
   </style>
 </head>
@@ -468,12 +479,12 @@
   <div class="wrap">
     <div class="panel">
       <h1>하이앤로우</h1>
-      <p class="sub">흐름을 읽고, 보상을 쌓고, 깨지기 전에 멈춰라.</p>
+      <p class="sub">한 번 더 갈지, 여기서 멈출지.</p>
 
       <div class="guide-box">
         현재 카드보다 다음 카드가 높을지 낮을지 선택하세요.<br>
         성공하면 보상 풀이 커지고, 실패하면 쌓인 보상은 전부 사라집니다.<br>
-        코인은 0 아래로도 내려갈 수 있습니다.
+        다음 카드는 현재 카드와 같은 숫자가 절대 나오지 않습니다.
       </div>
 
       <div class="top-stats">
@@ -510,10 +521,9 @@
         <div class="choice-hint" id="choiceHint"></div>
       </div>
 
-      <div class="bet-row">
-        <button class="bet-btn active" data-bet="10">10</button>
-        <button class="bet-btn" data-bet="20">20</button>
-        <button class="bet-btn" data-bet="30">30</button>
+      <div class="reward-banner" id="rewardBanner">
+        <div class="reward-main" id="rewardMain">이번 성공 시 +20</div>
+        <div class="reward-sub" id="rewardSub">기본 보상 10 × 현재 배당 x2.0</div>
       </div>
 
       <div class="action-row">
@@ -569,6 +579,8 @@
   </div>
 
   <script>
+    const BASE_REWARD = 10;
+
     const suits = [
       { symbol: "♠", color: "black" },
       { symbol: "♣", color: "black" },
@@ -587,7 +599,6 @@
     let minCoin = 100;
     let maxProfit = 0;
     let maxLoss = 0;
-    let currentBet = 10;
     let isBusy = false;
 
     const playingCard = document.getElementById("playingCard");
@@ -604,6 +615,10 @@
     const streakArea = document.getElementById("streakArea");
     const warningBox = document.getElementById("warningBox");
     const choiceHint = document.getElementById("choiceHint");
+
+    const rewardBanner = document.getElementById("rewardBanner");
+    const rewardMain = document.getElementById("rewardMain");
+    const rewardSub = document.getElementById("rewardSub");
 
     const highBtn = document.getElementById("highBtn");
     const lowBtn = document.getElementById("lowBtn");
@@ -625,8 +640,12 @@
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function drawCard() {
-      const value = randomInt(1, 13);
+    function drawCard(excludeValue = null) {
+      let value;
+      do {
+        value = randomInt(1, 13);
+      } while (value === excludeValue);
+
       const suit = suits[randomInt(0, suits.length - 1)];
       return { value, suit: suit.symbol, color: suit.color };
     }
@@ -721,9 +740,18 @@
       highBtn.disabled = state;
       lowBtn.disabled = state;
       stopBtn.disabled = state;
-      document.querySelectorAll(".bet-btn").forEach(btn => {
-        btn.disabled = state;
-      });
+    }
+
+    function updateRewardBanner() {
+      const nextMultiplier = getMultiplierByStreak(streak + 1);
+      const expectedReward = Math.floor(BASE_REWARD * nextMultiplier);
+
+      rewardMain.textContent = `이번 성공 시 +${expectedReward}`;
+      rewardSub.textContent = `기본 보상 ${BASE_REWARD} × 현재 배당 x${nextMultiplier.toFixed(1)}`;
+
+      rewardBanner.classList.remove("hot", "max");
+      if (streak >= 3) rewardBanner.classList.add("hot");
+      if (streak >= 6) rewardBanner.classList.add("max");
     }
 
     function updateTopUI() {
@@ -739,6 +767,7 @@
       streakArea.className = `streak-area level-${tier}`;
 
       updateDangerWarning(currentCard);
+      updateRewardBanner();
     }
 
     function updateStats() {
@@ -819,7 +848,7 @@
       }, 700);
     }
 
-    function classifyNearMiss(prev, next, choice, win) {
+    function classifyNearMiss(prev, next, win) {
       const diff = Math.abs(getNumericValue(next) - getNumericValue(prev));
       if (win) return "";
       if (diff === 1) return "아깝다… 한 끗 차이";
@@ -831,15 +860,6 @@
     playingCard.classList.add("flipped");
     updateChoiceHint();
     updateAll();
-
-    document.querySelectorAll(".bet-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        if (isBusy) return;
-        document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentBet = Number(btn.dataset.bet);
-      });
-    });
 
     async function play(choice) {
       if (isBusy) return;
@@ -854,7 +874,7 @@
 
       updateChoiceHint();
 
-      const nextCard = drawCard();
+      const nextCard = drawCard(currentCard.value);
       const prevCard = currentCard;
 
       await new Promise(r => setTimeout(r, 180));
@@ -869,7 +889,7 @@
         win = false;
       }
 
-      const nearMissText = classifyNearMiss(prevCard, nextCard, choice, win);
+      const nearMissText = classifyNearMiss(prevCard, nextCard, win);
 
       if (win) {
         wins++;
@@ -879,7 +899,7 @@
         const multiplier = getMultiplierByStreak(streak);
         bestMultiplier = Math.max(bestMultiplier, multiplier);
 
-        const reward = Math.floor(currentBet * multiplier);
+        const reward = Math.floor(BASE_REWARD * multiplier);
         pool += reward;
 
         resultMain.textContent = `성공 🔥 +${reward}`;
@@ -930,7 +950,6 @@
 
       updateAll();
 
-      // 결과 여운
       await new Promise(r => setTimeout(r, streak >= 4 ? 1100 : 850));
       setBusy(false);
     }
