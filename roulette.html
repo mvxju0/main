@@ -338,7 +338,7 @@
       </div>
 
       <div class="controls">
-        <button id="spinBtn">돌리기 (-1코인)</button>
+        <button id="spinBtn">돌리기 (-5코인)</button>
       </div>
 
       <div class="result" id="resultText">버튼을 눌러 룰렛을 돌려보세요.</div>
@@ -435,8 +435,23 @@
   </div>
 
   <script>
+  const COIN_KEY = "coin";
+const SPIN_COST = 5;
+
+function loadCoin() {
+  const saved = Number(localStorage.getItem(COIN_KEY));
+  if (Number.isNaN(saved)) {
+    localStorage.setItem(COIN_KEY, "100");
+    return 100;
+  }
+  return saved;
+}
+
+function saveCoin() {
+  localStorage.setItem(COIN_KEY, String(coin));
+}
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
-    const spinCost = 1;
+    const spinCost = 5;
     const jackpotReward = 50;
     const historyLimit = 10;
     const secondMatchChance = 0.25;
@@ -471,12 +486,12 @@
 
     let totalSpins = 0;
     let jackpotCount = 0;
-    let coinBalance = 100;
+    let coinBalance = loadCoin();
     let spentCoins = 0;
     let earnedCoins = 0;
     let currentFailStreak = 0;
     let maxFailStreak = 0;
-    let bestCoinBalance = 100;
+    let bestCoinBalance = loadcoin();
     const history = [];
 
     const animalCounts = {};
