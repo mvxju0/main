@@ -435,23 +435,84 @@
   </div>
 
   <script>
-  const COIN_KEY = "coin";
-const SPIN_COST = 5;
+    const COIN_KEY = "coin";
+    const ROULETTE_STATS_KEY = "roulette_stats_v1";
+    const SPIN_COST = 5;
 
-function loadCoin() {
-  const saved = Number(localStorage.getItem(COIN_KEY));
-  if (Number.isNaN(saved)) {
-    localStorage.setItem(COIN_KEY, "100");
-    return 100;
-  }
-  return saved;
-}
+    function loadCoin() {
+      const saved = Number(localStorage.getItem(COIN_KEY));
+      if (Number.isNaN(saved)) {
+        localStorage.setItem(COIN_KEY, "100");
+        return 100;
+      }
+      return saved;
+    }
 
-function saveCoin() {
-  localStorage.setItem(COIN_KEY, String(coin));
-}
+    function saveCoin() {
+      localStorage.setItem(COIN_KEY, String(coinBalance));
+    }
+
+    function createDefaultStats() {
+      const animalCounts = {};
+      animals.forEach(animal => {
+        animalCounts[animal] = 0;
+      });
+
+      return {
+        totalSpins: 0,
+        jackpotCount: 0,
+        spentCoins: 0,
+        earnedCoins: 0,
+        currentFailStreak: 0,
+        maxFailStreak: 0,
+        bestCoinBalance: coinBalance,
+        animalCounts,
+        history: []
+      };
+    }
+
+    function loadRouletteStats() {
+      try {
+        const raw = localStorage.getItem(ROULETTE_STATS_KEY);
+        if (!raw) return createDefaultStats();
+
+        const parsed = JSON.parse(raw);
+        const defaults = createDefaultStats();
+
+        return {
+          totalSpins: Number(parsed.totalSpins) || 0,
+          jackpotCount: Number(parsed.jackpotCount) || 0,
+          spentCoins: Number(parsed.spentCoins) || 0,
+          earnedCoins: Number(parsed.earnedCoins) || 0,
+          currentFailStreak: Number(parsed.currentFailStreak) || 0,
+          maxFailStreak: Number(parsed.maxFailStreak) || 0,
+          bestCoinBalance: Number.isFinite(Number(parsed.bestCoinBalance))
+            ? Number(parsed.bestCoinBalance)
+            : coinBalance,
+          animalCounts: { ...defaults.animalCounts, ...(parsed.animalCounts || {}) },
+          history: Array.isArray(parsed.history) ? parsed.history : []
+        };
+      } catch {
+        return createDefaultStats();
+      }
+    }
+
+    function saveRouletteStats() {
+      localStorage.setItem(ROULETTE_STATS_KEY, JSON.stringify({
+        totalSpins,
+        jackpotCount,
+        spentCoins,
+        earnedCoins,
+        currentFailStreak,
+        maxFailStreak,
+        bestCoinBalance,
+        animalCounts,
+        history
+      }));
+    }
+
     const animals = ["🐶", "🐱", "🐰", "🐼", "🦊", "🐸", "🐵", "🐯"];
-    const spinCost = 5;
+    const spinCost = SPIN_COST;
     const jackpotReward = 50;
     const historyLimit = 10;
     const secondMatchChance = 0.25;
@@ -484,19 +545,21 @@ function saveCoin() {
 
     const historyList = document.getElementById("historyList");
 
-    let totalSpins = 0;
-    let jackpotCount = 0;
     let coinBalance = loadCoin();
-    let spentCoins = 0;
-    let earnedCoins = 0;
-    let currentFailStreak = 0;
-    let maxFailStreak = 0;
-    let bestCoinBalance = loadcoin();
-    const history = [];
+    const savedStats = loadRouletteStats();
+
+    let totalSpins = savedStats.totalSpins;
+    let jackpotCount = savedStats.jackpotCount;
+    let spentCoins = savedStats.spentCoins;
+    let earnedCoins = savedStats.earnedCoins;
+    let currentFailStreak = savedStats.currentFailStreak;
+    let maxFailStreak = savedStats.maxFailStreak;
+    let bestCoinBalance = Math.max(savedStats.bestCoinBalance, coinBalance);
+    const history = savedStats.history.slice(0, historyLimit);
 
     const animalCounts = {};
     animals.forEach(animal => {
-      animalCounts[animal] = 0;
+      animalCounts[animal] = Number(savedStats.animalCounts[animal]) || 0;
     });
 
     function getRandomAnimal() {
@@ -648,6 +711,8 @@ function saveCoin() {
       updateCoinPanel();
       updateRecordPanel();
       renderHistory();
+      saveCoin();
+      saveRouletteStats();
     }
 
     async function stopReelWithAnimation(reelIndex, finalAnimal, extraDelay = 0) {
@@ -669,16 +734,6 @@ function saveCoin() {
     }
 
     async function spin() {
-      if (coinBalance < spinCost) {
-        resultText.textContent = `코인이 부족합니다. 현재 잔고: ${coinBalance}코인`;
-        resultText.classList.remove("jackpot");
-        resultText.classList.remove("near-hit-text");
-        hideJackpotGif();
-        clearJackpotEffects();
-        clearNearHitEffects();
-        return;
-      }
-
       spinBtn.disabled = true;
       resultText.classList.remove("jackpot");
       resultText.classList.remove("near-hit-text");
@@ -686,8 +741,10 @@ function saveCoin() {
       clearJackpotEffects();
       clearNearHitEffects();
 
+      // 코인 부족 검사 없음: 음수 허용
       coinBalance -= spinCost;
       spentCoins += spinCost;
+      updateAllPanels();
 
       reels.forEach(reel => reel.classList.add("spinning"));
 
