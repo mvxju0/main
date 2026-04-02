@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>더블 오어 스탑</title>
+  <link rel="stylesheet" href="dbstop.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="game-card" id="gameCard">
+      <header class="title-wrap">
+        <p class="eyebrow">RISK MODE</p>
+        <h1>더블 오어 스탑</h1>
+      </header>
+
+      <section class="panel total-panel">
+        <span class="label">현재 보유 코인</span>
+        <strong class="value" id="totalCoin">0</strong>
+      </section>
+
+      <section class="panel pot-panel" id="potPanel">
+        <span class="label">이번 판 누적 코인</span>
+        <strong class="pot-value" id="roundCoin">0</strong>
+      </section>
+
+      <section class="panel meta-panel">
+        <span class="label">현재 라운드</span>
+        <strong class="value" id="roundCount">0</strong>
+      </section>
+
+      <section class="status-box" id="statusBox" aria-live="polite">
+        게임을 시작해봐
+      </section>
+
+      <section class="result-stage" id="resultStage" aria-live="polite">
+        <div class="result-card" id="resultCard">
+          <p class="result-title" id="resultTitle">READY</p>
+          <p class="result-sub" id="resultSub">더블 버튼으로 도전을 시작해봐</p>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button id="startBtn" class="btn btn-start">게임 시작</button>
+        <button id="doubleBtn" class="btn btn-double" disabled>더블</button>
+        <button id="stopBtn" class="btn btn-stop" disabled>스탑</button>
+      </section>
+
+      <section class="sub-actions">
+        <button id="resetBtn" class="btn btn-reset">코인 초기화</button>
+        <p class="hint" id="coinWarning"></p>
+      </section>
+
+      <section class="stats panel">
+        <h2>기록 통계</h2>
+        <ul>
+          <li>총 플레이 횟수 <strong id="statPlays">0</strong></li>
+          <li>성공한 더블 횟수 <strong id="statSuccess">0</strong></li>
+          <li>실패한 더블 횟수 <strong id="statFail">0</strong></li>
+          <li>최고 기록 코인 <strong id="statBest">0</strong></li>
+        </ul>
+      </section>
+
+      <section class="logs panel">
+        <h2>최근 로그</h2>
+        <ul id="logList"></ul>
+      </section>
+    </section>
+  </main>
+
+  <script src="dbstop.js"></script>
+</body>
+</html>
