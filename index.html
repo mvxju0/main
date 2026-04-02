@@ -1,497 +1,73 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>메인페이지</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 24px 16px;
-      background:
-        radial-gradient(circle at top, rgba(216, 0, 108, 0.18), transparent 30%),
-        radial-gradient(circle at bottom, rgba(255, 196, 0, 0.12), transparent 28%),
-        linear-gradient(180deg, #120814 0%, #1b0d22 45%, #0f172a 100%);
-      font-family: 'Pretendard', sans-serif;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 520px;
-      text-align: center;
-      background: rgba(20, 12, 26, 0.72);
-      border: 1px solid rgba(255, 215, 120, 0.16);
-      border-radius: 24px;
-      padding: 22px 18px 26px;
-      box-shadow:
-        0 16px 40px rgba(0, 0, 0, 0.35),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(6px);
-      position: relative;
-    }
-
-    .hero-gif {
-      width: 100%;
-      max-width: 360px;
-      display: block;
-      margin: 0 auto 18px;
-      border-radius: 18px;
-      box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.32),
-        0 0 18px rgba(255, 214, 102, 0.18);
-      border: 1px solid rgba(255, 215, 120, 0.18);
-      user-select: none;
-      -webkit-user-drag: none;
-      cursor: pointer;
-    }
-
-    .sub-copy {
-      color: #f7c95b;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    h1 {
-      color: #fff7e6;
-      margin: 0 0 10px;
-      font-size: 34px;
-      line-height: 1.2;
-      text-shadow:
-        0 0 10px rgba(255, 213, 102, 0.18),
-        0 2px 12px rgba(0, 0, 0, 0.35);
-    }
-
-    .desc {
-      color: #d6ccda;
-      font-size: 15px;
-      line-height: 1.6;
-      margin: 0 0 18px;
-    }
-
-    .coin-box {
-      width: 100%;
-      margin: 0 auto 22px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: rgba(255, 248, 239, 0.08);
-      border: 1px solid rgba(255, 215, 120, 0.16);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.06),
-        0 8px 20px rgba(0,0,0,0.16);
-    }
-
-    .coin-label {
-      color: rgba(255, 246, 224, 0.72);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    .coin-value {
-      color: #ffd666;
-      font-size: 32px;
-      font-weight: 900;
-      line-height: 1;
-      text-shadow:
-        0 0 10px rgba(255, 214, 102, 0.18),
-        0 2px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .coin-help {
-      color: rgba(255, 246, 224, 0.72);
-      font-size: 12px;
-      margin-top: 8px;
-      line-height: 1.5;
-    }
-
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .btn {
-      display: block;
-      width: 100%;
-      min-height: 72px;
-      padding: 18px 20px;
-      font-size: 22px;
-      font-weight: 800;
-      color: #fffaf2;
-      background: linear-gradient(135deg, #ff2f92 0%, #d8006c 45%, #8d003f 100%);
-      border: 1px solid rgba(255, 214, 102, 0.24);
-      border-radius: 18px;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-      box-shadow:
-        0 10px 24px rgba(216, 0, 108, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.28);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px) scale(1.01);
-      filter: brightness(1.05);
-      box-shadow:
-        0 14px 30px rgba(216, 0, 108, 0.34),
-        0 0 18px rgba(255, 214, 102, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-    }
-
-    .btn span {
-      display: block;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255, 246, 224, 0.82);
-      margin-top: 6px;
-      letter-spacing: 0.04em;
-    }
-
-    .admin-panel {
-      display: none;
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 16px;
-      background: rgba(255, 248, 239, 0.08);
-      border: 1px solid rgba(255, 215, 120, 0.16);
-      text-align: left;
-    }
-
-    .admin-panel.show {
-      display: block;
-    }
-
-    .admin-title {
-      color: #fff3d7;
-      font-size: 16px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    .admin-input {
-      width: 100%;
-      height: 48px;
-      margin-bottom: 10px;
-      padding: 0 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 214, 102, 0.22);
-      background: rgba(255,255,255,0.08);
-      color: #fff7e6;
-      font-size: 15px;
-      outline: none;
-    }
-
-    .admin-input::placeholder {
-      color: rgba(255, 247, 230, 0.55);
-    }
-
-    .admin-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .admin-btn {
-      flex: 1;
-      min-width: 120px;
-      height: 48px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 15px;
-    }
-
-    .admin-btn.add {
-      background: linear-gradient(135deg, #ffb25b, #ff7b54);
-      color: #fff;
-    }
-
-    .admin-btn.close {
-      background: rgba(255,255,255,0.12);
-      color: #fff7e6;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .admin-hint {
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(255, 246, 224, 0.68);
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .tap-status {
-      min-height: 18px;
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(255, 214, 102, 0.75);
-      text-align: center;
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 16px 12px;
-        align-items: flex-start;
-      }
-
-      .container {
-        padding: 18px 14px 22px;
-        border-radius: 20px;
-      }
-
-      .hero-gif {
-        max-width: 100%;
-        margin-bottom: 16px;
-      }
-
-      .sub-copy {
-        font-size: 12px;
-        margin-bottom: 6px;
-      }
-
-      h1 {
-        font-size: 28px;
-        margin-bottom: 10px;
-      }
-
-      .desc {
-        font-size: 14px;
-        margin-bottom: 16px;
-      }
-
-      .coin-value {
-        font-size: 28px;
-      }
-
-      .btn {
-        min-height: 78px;
-        font-size: 24px;
-        border-radius: 16px;
-      }
-
-      .btn span {
-        font-size: 12px;
-      }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>더블 오어 스탑</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <main class="app">
+    <section class="game-card" id="gameCard">
+      <header class="title-wrap">
+        <p class="eyebrow">RISK MODE</p>
+        <h1>더블 오어 스탑</h1>
+      </header>
 
-  <div class="container">
-    <img
-      id="heroGif"
-      class="hero-gif"
-      src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyOGY1ZzFyNG13NG11MTdpbDM4MHZ5aDdmaGh5eWk0ZXRyZzhmdG8zaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/PhdC5X5qr6mzK/giphy.gif"
-      alt="카지노 분위기 GIF"
-    >
+      <section class="panel total-panel">
+        <span class="label">현재 보유 코인</span>
+        <strong class="value" id="totalCoin">0</strong>
+      </section>
 
-    <div class="sub-copy">LUCKY SELECT</div>
-    <h1>쥬지노</h1>
-    <p class="desc">
-      오늘의 운을 시험해볼 시간.<br>
-      원하는 게임을 골라 바로 입장하세요.
-    </p>
+      <section class="panel pot-panel" id="potPanel">
+        <span class="label">이번 판 누적 코인</span>
+        <strong class="pot-value" id="roundCoin">0</strong>
+      </section>
 
-    <div class="coin-box">
-      <div class="coin-label">CURRENT GAME MONEY</div>
-      <div class="coin-value" id="coinDisplay">100</div>
-      <div class="coin-help">모든 게임에서 공용으로 사용하는 게임머니입니다.</div>
-    </div>
+      <section class="panel meta-panel">
+        <span class="label">현재 라운드</span>
+        <strong class="value" id="roundCount">0</strong>
+      </section>
 
-    <div class="btn-group" id="btnGroup">
-      <button class="btn" onclick="location.href='race.html'">
-        애니멀런
-        <span>막판 추월과 반전이 터지는 관람형 레이스</span>
-      </button>
+      <section class="status-box" id="statusBox" aria-live="polite">
+        게임을 시작해봐
+      </section>
 
-      <button class="btn" onclick="location.href='roulette.html'">
-        애니멀룰렛
-        <span>한 번 더 누르게 되는 슬롯형 미니게임</span>
-      </button>
+      <section class="result-stage" id="resultStage" aria-live="polite">
+        <div class="result-card" id="resultCard">
+          <p class="result-title" id="resultTitle">READY</p>
+          <p class="result-sub" id="resultSub">더블 버튼으로 도전을 시작해봐</p>
+        </div>
+      </section>
 
-      <button class="btn" onclick="location.href='highlow.html'">
-        하이앤로우
-        <span>멈출지 더 갈지 고민하게 되는 카드 게임</span>
-      </button>
-    </div>
+      <section class="actions">
+        <button id="startBtn" class="btn btn-start">게임 시작</button>
+        <button id="doubleBtn" class="btn btn-double" disabled>더블</button>
+        <button id="stopBtn" class="btn btn-stop" disabled>스탑</button>
+      </section>
 
-    <div class="tap-status" id="tapStatus"></div>
+      <section class="sub-actions">
+        <button id="resetBtn" class="btn btn-reset">코인 초기화</button>
+        <p class="hint" id="coinWarning"></p>
+      </section>
 
-    <div class="admin-panel" id="adminPanel">
-      <div class="admin-title">관리자 모드</div>
-      <input
-        type="text"
-        id="btnNameInput"
-        class="admin-input"
-        placeholder="버튼 이름 예: highlow"
-      >
-      <input
-        type="text"
-        id="btnPageInput"
-        class="admin-input"
-        placeholder="이동 페이지 예: highlow.html"
-      >
-      <div class="admin-actions">
-        <button class="admin-btn add" id="addBtn">버튼 추가</button>
-        <button class="admin-btn close" id="closeAdminBtn">닫기</button>
-      </div>
-      <div class="admin-hint">
-        예시) 이름: highlow / 페이지: highlow.html
-      </div>
-    </div>
-  </div>
+      <section class="stats panel">
+        <h2>기록 통계</h2>
+        <ul>
+          <li>총 플레이 횟수 <strong id="statPlays">0</strong></li>
+          <li>성공한 더블 횟수 <strong id="statSuccess">0</strong></li>
+          <li>실패한 더블 횟수 <strong id="statFail">0</strong></li>
+          <li>최고 기록 코인 <strong id="statBest">0</strong></li>
+        </ul>
+      </section>
 
-  <script>
-    const STORAGE_KEY = "joojino_custom_buttons_v1";
-    const COIN_KEY = "coin";
+      <section class="logs panel">
+        <h2>최근 로그</h2>
+        <ul id="logList"></ul>
+      </section>
+    </section>
+  </main>
 
-    const heroGif = document.getElementById("heroGif");
-    const tapStatus = document.getElementById("tapStatus");
-    const adminPanel = document.getElementById("adminPanel");
-    const btnGroup = document.getElementById("btnGroup");
-    const btnNameInput = document.getElementById("btnNameInput");
-    const btnPageInput = document.getElementById("btnPageInput");
-    const addBtn = document.getElementById("addBtn");
-    const closeAdminBtn = document.getElementById("closeAdminBtn");
-    const coinDisplay = document.getElementById("coinDisplay");
-
-    let tapCount = 0;
-    let tapTimer = null;
-
-    function initCoin() {
-      let coin = Number(localStorage.getItem(COIN_KEY));
-      if (Number.isNaN(coin)) {
-        coin = 100;
-        localStorage.setItem(COIN_KEY, coin);
-      }
-      coinDisplay.textContent = coin;
-      coinDisplay.classList.remove("coin-positive", "coin-negative", "coin-neutral");
-      coinDisplay.classList.add(
-        coin > 0 ? "coin-positive" : coin < 0 ? "coin-negative" : "coin-neutral"
-      );
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement("div");
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function loadCustomButtons() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
-    }
-
-    function saveCustomButtons(buttons) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(buttons));
-    }
-
-    function createGameButton(name, page) {
-      const button = document.createElement("button");
-      button.className = "btn";
-      button.onclick = () => {
-        location.href = page;
-      };
-
-      button.innerHTML = `
-        ${escapeHtml(name)}
-        <span>${escapeHtml(page)} 로 이동</span>
-      `;
-
-      btnGroup.appendChild(button);
-    }
-
-    function renderCustomButtons() {
-      const customButtons = loadCustomButtons();
-      customButtons.forEach(item => {
-        if (item && item.name && item.page) {
-          createGameButton(item.name, item.page);
-        }
-      });
-    }
-
-    function openAdminPanel() {
-      adminPanel.classList.add("show");
-      tapStatus.textContent = "관리자 모드가 열렸습니다.";
-    }
-
-    function closeAdminPanel() {
-      adminPanel.classList.remove("show");
-      tapStatus.textContent = "";
-      btnNameInput.value = "";
-      btnPageInput.value = "";
-    }
-
-    function handleGifTap() {
-      tapCount += 1;
-
-      if (tapCount < 5) {
-        tapStatus.textContent = `관리자 모드까지 ${5 - tapCount}번 더 터치`;
-      }
-
-      clearTimeout(tapTimer);
-      tapTimer = setTimeout(() => {
-        tapCount = 0;
-        if (!adminPanel.classList.contains("show")) {
-          tapStatus.textContent = "";
-        }
-      }, 1600);
-
-      if (tapCount >= 5) {
-        tapCount = 0;
-        clearTimeout(tapTimer);
-        openAdminPanel();
-      }
-    }
-
-    function addCustomButton() {
-      const name = btnNameInput.value.trim();
-      const page = btnPageInput.value.trim();
-
-      if (!name || !page) {
-        tapStatus.textContent = "버튼 이름과 이동 페이지를 모두 입력하세요.";
-        return;
-      }
-
-      const buttons = loadCustomButtons();
-      buttons.push({ name, page });
-      saveCustomButtons(buttons);
-
-      createGameButton(name, page);
-
-      btnNameInput.value = "";
-      btnPageInput.value = "";
-      tapStatus.textContent = `버튼 "${name}" 이(가) 추가되었습니다.`;
-    }
-
-    heroGif.addEventListener("click", handleGifTap);
-    heroGif.addEventListener("touchstart", handleGifTap, { passive: true });
-
-    addBtn.addEventListener("click", addCustomButton);
-    closeAdminBtn.addEventListener("click", closeAdminPanel);
-
-    initCoin();
-    renderCustomButtons();
-  </script>
-
+  <script src="script.js"></script>
 </body>
 </html>
