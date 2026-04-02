@@ -960,9 +960,8 @@
       if (choice === "high" && getNumericValue(nextCard) > getNumericValue(prevCard)) win = true;
       if (choice === "low" && getNumericValue(nextCard) < getNumericValue(prevCard)) win = true;
 
-      if (streak >= 5 && Math.random() < 0.15) {
-        win = false;
-      }
+      // 판정은 카드 대소 비교 결과만 반영한다.
+      // (연승 구간에서도 임의로 실패 처리하지 않음)
 
       const nearMissText = classifyNearMiss(prevCard, nextCard, win);
 
