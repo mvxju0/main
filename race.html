@@ -136,6 +136,57 @@
       font-size: 14px;
     }
 
+    .coin-box {
+      margin-top: 14px;
+      background: #fff8ef;
+      border: 1px solid #ffd9b8;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: bold;
+      color: #7a4b33;
+    }
+
+    .betting-box {
+      margin-top: 14px;
+      background: #fff8f1;
+      border: 1px solid #ffe0cc;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .bet-row {
+      display: grid;
+      gap: 8px;
+    }
+
+    .bet-row label {
+      font-size: 13px;
+      color: #7a5b4a;
+      font-weight: bold;
+    }
+
+    .bet-row select,
+    .bet-row input {
+      height: 42px;
+      border: 1px solid #f1cdb5;
+      border-radius: 10px;
+      background: #fff;
+      padding: 0 10px;
+      font: inherit;
+    }
+
+    .odds-preview {
+      font-size: 14px;
+      color: #7a5b4a;
+      font-weight: bold;
+      min-height: 20px;
+    }
+
     .action-row {
       display: flex;
       gap: 10px;
@@ -470,6 +521,22 @@
         <div class="participants" id="participantsList"></div>
         <div class="empty" id="emptyText">아직 참가자가 없습니다.</div>
         <div class="helper" id="participantCountText">현재 참가자: 0명</div>
+        <div class="coin-box">
+          <span>보유 코인</span>
+          <span id="coinValue">100</span>
+        </div>
+
+        <div class="betting-box">
+          <div class="bet-row">
+            <label for="betAnimalSelect">베팅 대상</label>
+            <select id="betAnimalSelect"></select>
+          </div>
+          <div class="bet-row">
+            <label for="betAmountInput">베팅 금액</label>
+            <input id="betAmountInput" type="number" min="10" step="10" value="10" />
+          </div>
+          <div class="odds-preview" id="oddsPreview">참가자를 2명 이상 선택하면 배당이 표시됩니다.</div>
+        </div>
 
         <div class="action-row">
           <button id="startBtn" class="primary-wide">경주 시작</button>
@@ -506,6 +573,9 @@
   </div>
 
   <script>
+    const COIN_KEY = "coin";
+    const HOUSE_EDGE = 0.08;
+    const MIN_BET = 10;
     const animalOptions = [
       { name: "강아지", emoji: "🐶" },
       { name: "고양이", emoji: "🐱" },
@@ -519,9 +589,12 @@
 
     const participants = [];
     let raceWeights = [];
+    let raceOdds = [];
     let currentRaceData = [];
     let raceRunning = false;
     let winnerLog = [];
+    let selectedBetId = null;
+    let coin = loadCoin();
 
     const setupScreen = document.getElementById("setupScreen");
     const raceScreen = document.getElementById("raceScreen");
@@ -530,6 +603,10 @@
     const participantsList = document.getElementById("participantsList");
     const emptyText = document.getElementById("emptyText");
     const participantCountText = document.getElementById("participantCountText");
+    const coinValue = document.getElementById("coinValue");
+    const betAnimalSelect = document.getElementById("betAnimalSelect");
+    const betAmountInput = document.getElementById("betAmountInput");
+    const oddsPreview = document.getElementById("oddsPreview");
 
     const startBtn = document.getElementById("startBtn");
 
@@ -544,6 +621,19 @@
     const doubleBtn = document.getElementById("doubleBtn");
     const backBtn = document.getElementById("backBtn");
     const winnerHistory = document.getElementById("winnerHistory");
+
+    function loadCoin() {
+      const saved = Number(localStorage.getItem(COIN_KEY));
+      if (Number.isNaN(saved)) {
+        localStorage.setItem(COIN_KEY, "100");
+        return 100;
+      }
+      return saved;
+    }
+
+    function saveCoin() {
+      localStorage.setItem(COIN_KEY, String(coin));
+    }
 
     function showSetupScreen() {
       setupScreen.classList.add("show");
@@ -562,6 +652,60 @@
 
     function assignRaceWeights() {
       raceWeights = participants.map(() => randomInt(60, 140));
+      raceOdds = buildOddsFromWeights(raceWeights);
+    }
+
+    function buildOddsFromWeights(weights) {
+      if (!weights.length) return [];
+      const total = weights.reduce((sum, value) => sum + value, 0);
+      return weights.map(weight => {
+        const probability = weight / total;
+        const fairOdds = 1 / probability;
+        const payoutOdds = fairOdds * (1 - HOUSE_EDGE);
+        return Math.max(1.10, Number(payoutOdds.toFixed(2)));
+      });
+    }
+
+    function getBetAmount() {
+      const amount = Number(betAmountInput.value);
+      if (!Number.isFinite(amount)) return 0;
+      return Math.floor(amount);
+    }
+
+    function updateCoinUI() {
+      coinValue.textContent = String(coin);
+    }
+
+    function renderBettingControls() {
+      if (participants.length < 2) {
+        betAnimalSelect.innerHTML = `<option value="">참가자 2명 이상 필요</option>`;
+        betAnimalSelect.disabled = true;
+        oddsPreview.textContent = "참가자를 2명 이상 선택하면 배당이 표시됩니다.";
+        return;
+      }
+
+      betAnimalSelect.disabled = false;
+      betAnimalSelect.innerHTML = participants.map((p, i) => `
+        <option value="${p.id}">${p.emoji} ${p.name} (x${(raceOdds[i] || 1.1).toFixed(2)})</option>
+      `).join("");
+
+      if (!participants.some(p => String(p.id) === String(selectedBetId))) {
+        selectedBetId = participants[0].id;
+      }
+      betAnimalSelect.value = String(selectedBetId);
+      updateOddsPreview();
+    }
+
+    function updateOddsPreview() {
+      const amount = getBetAmount();
+      const index = participants.findIndex(p => String(p.id) === String(selectedBetId));
+      if (index < 0 || participants.length < 2) {
+        oddsPreview.textContent = "베팅 정보를 확인해 주세요.";
+        return;
+      }
+      const odds = raceOdds[index] || 1.1;
+      const payout = Math.floor(amount * odds);
+      oddsPreview.textContent = `배당 x${odds.toFixed(2)} · 적중 시 ${payout}코인 지급 (하우스 엣지 ${(HOUSE_EDGE * 100).toFixed(0)}%)`;
     }
 
     function renderAnimalButtons() {
@@ -598,6 +742,8 @@
 
       participantCountText.textContent = `현재 참가자: ${participants.length}명`;
       renderAnimalButtons();
+      renderBettingControls();
+      updateCoinUI();
     }
 
     function addParticipantByAnimal(name) {
@@ -614,11 +760,18 @@
       });
 
       assignRaceWeights();
+      if (!selectedBetId) {
+        selectedBetId = participants[0].id;
+      }
       renderParticipants();
     }
 
     function removeParticipant(index) {
+      const removed = participants[index];
       participants.splice(index, 1);
+      if (removed && String(removed.id) === String(selectedBetId)) {
+        selectedBetId = participants[0] ? participants[0].id : null;
+      }
       assignRaceWeights();
       renderParticipants();
     }
@@ -750,7 +903,33 @@
       }
       if (raceRunning) return;
 
-      assignRaceWeights();
+      const betAmount = getBetAmount();
+      if (betAmount < MIN_BET) {
+        alert(`최소 베팅 금액은 ${MIN_BET}코인입니다.`);
+        return;
+      }
+      if (betAmount > coin) {
+        alert("코인이 부족합니다.");
+        return;
+      }
+
+      const betIndex = participants.findIndex(p => String(p.id) === String(selectedBetId));
+      if (betIndex < 0) {
+        alert("베팅 대상을 선택해 주세요.");
+        return;
+      }
+
+      const placedBet = {
+        participantId: participants[betIndex].id,
+        participantName: participants[betIndex].name,
+        participantEmoji: participants[betIndex].emoji,
+        odds: raceOdds[betIndex] || 1.1,
+        amount: betAmount
+      };
+
+      coin -= placedBet.amount;
+      saveCoin();
+      updateCoinUI();
 
       raceRunning = true;
       resultBox.classList.remove("show");
@@ -941,11 +1120,23 @@
         }
 
         resultTitle.textContent = `${winner.emoji} ${winner.name} 우승!`;
-        resultSub.textContent = second
+        const raceResultSub = second
           ? `2위와 ${diffText}`
           : `단독 완주`;
+        resultSub.textContent = raceResultSub;
 
         resultComment.textContent = classifyRaceComment(winner, second, diffSec);
+
+        const isWinBet = String(placedBet.participantId) === String(winner.id);
+        if (isWinBet) {
+          const reward = Math.floor(placedBet.amount * placedBet.odds);
+          coin += reward;
+          saveCoin();
+          updateCoinUI();
+          resultSub.textContent = `${raceResultSub} · 베팅 적중! +${reward}코인`;
+        } else {
+          resultSub.textContent = `${raceResultSub} · 베팅 실패 -${placedBet.amount}코인`;
+        }
 
         ranking.innerHTML = result.map((p, idx) => `
           <div class="ranking-item">
@@ -984,13 +1175,22 @@
 
     startBtn.addEventListener("click", startRace);
     doubleBtn.addEventListener("click", startRace);
+    betAnimalSelect.addEventListener("change", () => {
+      selectedBetId = betAnimalSelect.value;
+      updateOddsPreview();
+    });
+    betAmountInput.addEventListener("input", updateOddsPreview);
     backBtn.addEventListener("click", () => {
       if (raceRunning) return;
+      assignRaceWeights();
       showSetupScreen();
+      renderParticipants();
     });
 
+    assignRaceWeights();
     renderAnimalButtons();
     renderParticipants();
+    updateCoinUI();
   </script>
 </body>
 </html>
